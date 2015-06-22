@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/ramda/0.15.0/ramda.min.js"></script>
+        <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body,
+            html {
+                margin: 0px;
+                padding: 0px;
+                font-family: sans-serif;
+            }
+
+            body {
+                width: 1000px;
+                margin: 40px auto;
+            }
+
+            select,
+            input,
+            button,
+            textarea {
+                width: 100%;
+                background-color: white;
+                border: 1px solid #CCC;
+                padding: 5px;
+                color: #777;
+                box-shadow: 0px 0px 4px 1px #EEE inset;
+                margin-bottom: 7px;
+                font-family: sans-serif;
+                font-size: 13px;
+            }
+
+            textarea {
+                height: 300px;
+            }
+
+            hr {
+                border: 0px;
+                border-top: 1px solid #CCC;
+                margin: 20px 0px;
+            }
+
+            h1 {
+                color: #336699;
+                margin: 0px 0px 10px 0px;
+                padding: 0px;
+                line-height: auto;
+                font-size: 22px;
+                font-weight: normal;
+            }
+        </style>
+    </head>
+
+    <body>
+        <select id="host">
+            <option value="0">Choose Domain</option>
+            <option value="x">Create New Domain</option>
+            <option disabled></option>
+            {% for domain in domains %}
+            <option value="{{ domain[0] }}">{{ domain[1] }}</option>
+            {% endfor %}
+        </select>
+        <select id="bind">
+            <option value="0">Choose Variable</option>
+            <option value="x">Create New Variable</option>
+            <option disabled></option>
+            {% for variable in variables %}
+            <option value="{{ variable[0] }}">{{ variable[1] }}</option>
+            {% endfor %}
+        </select>
+
+        <hr/>
+
+        <h1>Editor</h1>
+        <textarea id="editor"></textarea>
+        <button id="save">Save</button>
+    </body>
+
+    <script>
+        var bindings = {{ values }};
+        var cur_data = {
+            host: null,
+            bind: null
+        };
+
+        function getCookie(name) {
+            var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+            return r ? r[1] : undefined;
+        }
+
+        $('select').on('change', function() {
+            var this$ = $(this);
+            var target$ = $('option:selected', this);
+            var xsrf = getCookie("_xsrf");
+
+            // Create New Items.
+            if(target$.val() === 'x') {
+                var method = this$.attr('id');
+
+                $.post('/admin', {
+                    'method': method,
+                    '_xsrf': xsrf,
+                    'value': window.prompt('Give a name for this data.', 'Name')
+                });
+
+                this$.val('0');
+                return;
+            }
+
+            // Extract Indices.
+            cur_data[this$.attr('id')] = target$.text();
+
+            // Read data into textarea.
+            if(cur_data.host !== null && cur_data.bind !== null) {
+                $('#editor').text(bindings[cur_data.host][cur_data.bind]);
+            } else {
+                $('#editor').text('');
+            }
+        });
+
+        $('button').on('click', function() {
+            if(cur_data.host !== null && cur_data.bind !== null) {
+                $.post('/admin', {
+                    'method': 'save',
+                    '_xsrf': getCookie("_xsrf"),
+                    'host': cur_data.host,
+                    'bind': cur_data.bind,
+                    'value': $('#editor').text()
+                });
+            }
+        });
+    </script>
+</html>

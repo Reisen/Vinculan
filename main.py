@@ -53,6 +53,11 @@ class Mail:
 
 
 if __name__ == '__main__':
+    with open('schema.sql') as f:
+        import sqlite3
+        db = sqlite3.connect('data.db')
+        db.executescript(f.read())
+
     app = Application(settings['url_map'], **settings)
     app.listen(8001)
     IOLoop.current().start()

@@ -1,14 +1,14 @@
-CREATE TABLE variable (
+CREATE TABLE IF NOT EXISTS variable (
     id INTEGER PRIMARY KEY,
     name TEXT
 );
 
-CREATE TABLE domain (
+CREATE TABLE IF NOT EXISTS domain (
     id INTEGER PRIMARY KEY,
     host TEXT
 );
 
-CREATE TABLE value (
+CREATE TABLE IF NOT EXISTS value (
     id INTEGER PRIMARY KEY,
     domain INTEGER,
     variable INTEGER,
