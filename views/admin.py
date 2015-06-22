@@ -8,7 +8,8 @@ class Index(Base):
             SELECT domain.host, variable.name, value.value FROM value
             LEFT JOIN variable ON variable.id == value.variable
             LEFT JOIN domain ON domain.id == value.domain
-        ''')
+            ORDER BY domain.host, variable.name ASC
+        ''').fetchall()
 
         bindings = defaultdict(dict)
 
@@ -16,9 +17,10 @@ class Index(Base):
             bindings[domain][name] = value
 
         self.template('_admin.html', {
-            'domains': self.db.execute('''SELECT * FROM domain'''),
-            'variables': self.db.execute('''SELECT * FROM variable'''),
-            'values': dumps(bindings)
+            'domains': self.db.execute('''SELECT * FROM domain''').fetchall(),
+            'variables': self.db.execute('''SELECT * FROM variable ORDER BY name ASC''').fetchall(),
+            'values': dumps(bindings),
+            'all': data
         })
 
     def post(self):

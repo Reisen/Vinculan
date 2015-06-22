@@ -32,8 +32,8 @@ class Serve(Base):
             SELECT variable.name, value.value FROM value
             LEFT JOIN variable ON variable.id == value.variable
             LEFT JOIN domain ON domain.id == value.domain
-            WHERE domain.host = ?
-        ''', (self.request.host,))
+            WHERE domain.host LIKE ?
+        ''', ('%{}%'.format(self.request.host),))
 
         bindings = {name: value for (name, value) in data}
 

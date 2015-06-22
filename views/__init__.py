@@ -9,6 +9,7 @@ template = Environment(loader = FileSystemLoader(['templates/']))
 class Base(RequestHandler):
     def prepare(self):
         self.db = sqlite3.connect('data.db')
+        self.db.row_factory = sqlite3.Row
 
     def on_finish(self):
         self.db.close()

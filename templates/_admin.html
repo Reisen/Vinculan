@@ -53,6 +53,10 @@
                 font-size: 22px;
                 font-weight: normal;
             }
+
+            table {
+                width: 100%;
+            }
         </style>
     </head>
 
@@ -79,6 +83,23 @@
         <h1>Editor</h1>
         <textarea id="editor"></textarea>
         <button id="save">Save</button>
+
+        <table>
+            <tr>
+                <th>Domain</th>
+                {% for variable in variables %}
+                <th>{{ variable[1] }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in all|groupby('host') %}
+            <tr>
+                <td>{{ row.grouper }}</td>
+                {% for variable in row.list %}
+                <td>{{ variable.value }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
     </body>
 
     <script>
