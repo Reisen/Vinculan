@@ -125,12 +125,33 @@
 
         $('button').on('click', function() {
             if(cur_data.host !== null && cur_data.bind !== null) {
+                var host = cur_data.host;
+                var bind = cur_data.bind;
+
+                $('#host option').each(function(k, v) {
+                    var elem$ = $(v);
+
+                    if(elem$.html() === host) {
+                        host = elem$.val();
+                        return;
+                    }
+                });
+
+                $('#bind option').each(function(k, v) {
+                    var elem$ = $(v);
+
+                    if(elem$.html() === bind) {
+                        bind = elem$.val();
+                        return;
+                    }
+                });
+
                 $.post('/admin', {
                     'method': 'save',
                     '_xsrf': getCookie("_xsrf"),
-                    'host': cur_data.host,
-                    'bind': cur_data.bind,
-                    'value': $('#editor').text()
+                    'host': host,
+                    'bind': bind,
+                    'value': $('#editor').val()
                 });
             }
         });

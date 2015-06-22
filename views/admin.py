@@ -36,8 +36,10 @@ class Index(Base):
 
         if method == 'save':
             host = self.get_argument('host')
-            bind = self.get_argument('host')
-            value = self.get_argument('host')
+            bind = self.get_argument('bind')
+            value = self.get_argument('value')
+            self.db.execute('''INSERT OR REPLACE INTO value (domain, variable, value) VALUES (?, ?, ?)''', (host, bind, value))
+            self.db.commit()
 
         self.write(dumps({
             'status': 'success'

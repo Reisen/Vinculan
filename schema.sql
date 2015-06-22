@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS value (
     domain INTEGER,
     variable INTEGER,
     value TEXT,
+    UNIQUE(domain, variable),
     FOREIGN KEY(domain) REFERENCES domain(id),
     FOREIGN KEY(variable) REFERENCES variabe(id)
 );
