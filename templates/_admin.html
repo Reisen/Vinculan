@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
     <head>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
         <style>
             * {
@@ -12,6 +13,7 @@
                 margin: 0px;
                 padding: 0px;
                 font-family: sans-serif;
+                font-size: 12px;
             }
 
             body {
@@ -145,13 +147,17 @@
                 <th>
                     Domain
                     <a id="new-variable" href="">&gt;</a>
-                    <a id="new-domain" href="">+</a>
+                    <a id="new-domain" href="">
+                        <i class="fa fa-plus"></i>
+                    </a>
                 </th>
 
                 {% for variable in variables %}
                     <th>
                         {{ variable.name }}
-                        <a href="">x</a>
+                        <a href="">
+                            <i class="fa fa-trash"></i>
+                        </a>
                     </th>
                 {% endfor %}
             </tr>
