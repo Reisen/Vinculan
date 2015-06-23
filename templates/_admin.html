@@ -1,7 +1,6 @@
 <!doctype html>
 <html>
     <head>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/ramda/0.15.0/ramda.min.js"></script>
         <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
         <style>
             * {
@@ -16,165 +15,243 @@
             }
 
             body {
-                width: 1000px;
-                margin: 40px auto;
-            }
-
-            select,
-            input,
-            button,
-            textarea {
-                width: 100%;
-                background-color: white;
-                border: 1px solid #CCC;
-                padding: 5px;
-                color: #777;
-                box-shadow: 0px 0px 4px 1px #EEE inset;
-                margin-bottom: 7px;
-                font-family: sans-serif;
-                font-size: 13px;
-            }
-
-            textarea {
-                height: 300px;
-            }
-
-            hr {
-                border: 0px;
-                border-top: 1px solid #CCC;
-                margin: 20px 0px;
-            }
-
-            h1 {
-                color: #336699;
-                margin: 0px 0px 10px 0px;
-                padding: 0px;
-                line-height: auto;
-                font-size: 22px;
-                font-weight: normal;
+                margin: 10px;
             }
 
             table {
-                width: 100%;
+                width: auto;
+                border-spacing: 0px;
+                border-collapse: separate;
             }
+
+                table th {
+                    text-align: left;
+                    color: #4499FF;
+                    font-weight: normal;
+                    border-bottom: 4px solid #336699;
+                    background-color: #4499CC;
+                    color: white;
+                    padding: 5px 10px;
+                    min-width: 200px;
+                    font-size: 14px;
+                }
+
+                    table th a,
+                    table td a {
+                        float: right;
+                        color: white;
+                        text-decoration: none;
+                    }
+
+                    table td a {
+                        color: #4499FF;
+                    }
+
+                table td {
+                    padding: 5px 10px;
+                }
+
+                    table td:hover {
+                        cursor: pointer;
+                        background-color: #F5F5F5;
+                    }
+
+            #template {
+                position: absolute;
+                margin: auto;
+                top: 0px;
+                bottom: 0px;
+                left: 0px;
+                right: 0px;
+                width: 1000px;
+                height: 65px;
+                border: 1px solid #CCC;
+                background-color: white;
+                padding: 10px;
+                display: none;
+            }
+
+                #template select {
+                    width: 100%;
+                    border: 1px solid #CCC;
+                    box-shadow: 0px 0px 3px 0px #CCC inset;
+                    background-color: white;
+                    font-family: sans-serif;
+                    font-size: 14px;
+                    padding: 10px;
+                    color: #333;
+                }
+
+            #editor {
+                position: absolute;
+                margin: auto;
+                top: 0px;
+                bottom: 0px;
+                left: 0px;
+                right: 0px;
+                width: 1000px;
+                height: 400px;
+                border: 1px solid #CCC;
+                background-color: white;
+                padding: 10px;
+                display: none;
+            }
+
+                #editor textarea {
+                    width: 100%;
+                    border: 1px solid #CCC;
+                    box-shadow: 0px 0px 3px 0px #CCC inset;
+                    background-color: white;
+                    font-family: sans-serif;
+                    font-size: 14px;
+                    height: 340px;
+                    margin-bottom: 5px;
+                    padding: 15px;
+                    color: #333;
+                }
+
+                #editor button {
+                    width: 100%;
+                    border: 1px solid #CCC;
+                    box-shadow: 0px 0px 3px 0px #CCC inset;
+                    background-color: white;
+                    font-family: sans-serif;
+                    font-size: 14px;
+                    color: black;
+                    padding: 5px;
+                }
         </style>
     </head>
 
     <body>
-        <select id="host">
-            <option value="0">Choose Domain</option>
-            <option value="x">Create New Domain</option>
-            <option disabled></option>
-            {% for domain in domains %}
-            <option value="{{ domain[0] }}">{{ domain[1] }}</option>
-            {% endfor %}
-        </select>
-        <select id="bind">
-            <option value="0">Choose Variable</option>
-            <option value="x">Create New Variable</option>
-            <option disabled></option>
-            {% for variable in variables %}
-            <option value="{{ variable[0] }}">{{ variable[1] }}</option>
-            {% endfor %}
-        </select>
+        <div id="editor">
+            <textarea></textarea>
+            <button>
+                Save
+            </button>
+        </div>
 
-        <hr/>
-
-        <h1>Editor</h1>
-        <textarea id="editor"></textarea>
-        <button id="save">Save</button>
+        <div id="template">
+            <select>
+                {% for template in templates %}
+                    <option>{{ template }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
         <table>
             <tr>
-                <th>Domain</th>
+                <th>
+                    Domain
+                    <a id="new-variable" href="">&gt;</a>
+                    <a id="new-domain" href="">+</a>
+                </th>
+
                 {% for variable in variables %}
-                <th>{{ variable[1] }}</th>
+                    <th>
+                        {{ variable.name }}
+                        <a href="">x</a>
+                    </th>
                 {% endfor %}
             </tr>
+
             {% for row in all|groupby('host') %}
-            <tr>
-                <td>{{ row.grouper }}</td>
-                {% for variable in row.list %}
-                <td>{{ variable.value }}</td>
-                {% endfor %}
-            </tr>
+                <tr>
+                    <td
+                        class="templater"
+                        data-for="{{ row.grouper }}">
+                        {{ row.grouper }}
+                        <a href="">x</a>
+                    </td>
+
+                    {% for variable in row.list %}
+                        <td
+                            class="setter"
+                            data-for="{{ row.grouper }}"
+                            data-var="{{ variable.name }}">{{ variable.value }}</td>
+                    {% endfor %}
+                </tr>
             {% endfor %}
         </table>
     </body>
 
     <script>
-        var bindings = {{ values }};
-        var cur_data = {
-            host: null,
-            bind: null
-        };
+        $(document).ready(function() {
+            function getCookie(name) {
+                var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+                return r ? r[1] : undefined;
+            }
 
-        function getCookie(name) {
-            var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-            return r ? r[1] : undefined;
-        }
+            var xsrf     = getCookie('_xsrf');
 
-        $('select').on('change', function() {
-            var this$ = $(this);
-            var target$ = $('option:selected', this);
-            var xsrf = getCookie("_xsrf");
+            $('.setter').on('click', function() {
+                var $this = $(this);
+                var $edit = $('#editor');
+                var $area = $edit.find('textarea');
 
-            // Create New Items.
-            if(target$.val() === 'x') {
-                var method = this$.attr('id');
+                $edit.show();
+                $area.focus();
+                $area.val($this.html());
+                $edit.data('for', $this.data('for'));
+                $edit.data('var', $this.data('var'));
+                $edit.find('button').off().on('click', function() {
+                    $this.html($area.val());
 
+                    $.post('/admin', {
+                        '_xsrf': xsrf,
+                        'method': 'save',
+                        'host': $edit.data('for'),
+                        'bind': $edit.data('var'),
+                        'value': $area.val()
+                    }).success(function() {
+                        $edit.hide();
+                    });
+                });
+            });
+
+            $('.templater').on('click', function() {
+                var $this = $(this);
+                var $edit = $('#template');
+                var $drop = $edit.find('select');
+
+                $edit.show();
+                $drop.on('change', function() {
+                    var $self = $(this);
+
+                    $.post('/admin', {
+                        '_xsrf': xsrf,
+                        'method': 'template',
+                        'host': $this.data('for'),
+                        'value': $self.find('option:selected').val()
+                    }).success(function() {
+                        $edit.hide();
+                    });
+                });
+            });
+
+            $('#new-domain').on('click', function() {
                 $.post('/admin', {
-                    'method': method,
                     '_xsrf': xsrf,
-                    'value': window.prompt('Give a name for this data.', 'Name')
+                    'method': 'host',
+                    'value': window.prompt('Enter a new domain name.', '')
+                }).success(function() {
+                    window.location = window.location;
                 });
 
-                this$.val('0');
-                return;
-            }
+                return false;
+            });
 
-            // Extract Indices.
-            cur_data[this$.attr('id')] = target$.text();
-
-            // Read data into textarea.
-            if(cur_data.host !== null && cur_data.bind !== null) {
-                $('#editor').text(bindings[cur_data.host][cur_data.bind]);
-            } else {
-                $('#editor').text('');
-            }
-        });
-
-        $('button').on('click', function() {
-            if(cur_data.host !== null && cur_data.bind !== null) {
-                var host = cur_data.host;
-                var bind = cur_data.bind;
-
-                $('#host option').each(function(k, v) {
-                    var elem$ = $(v);
-
-                    if(elem$.html() === host) {
-                        host = elem$.val();
-                        return;
-                    }
-                });
-
-                $('#bind option').each(function(k, v) {
-                    var elem$ = $(v);
-
-                    if(elem$.html() === bind) {
-                        bind = elem$.val();
-                        return;
-                    }
-                });
-
+            $('#new-variable').on('click', function() {
                 $.post('/admin', {
-                    'method': 'save',
-                    '_xsrf': getCookie("_xsrf"),
-                    'host': host,
-                    'bind': bind,
-                    'value': $('#editor').val()
+                    '_xsrf': xsrf,
+                    'method': 'bind',
+                    'value': window.prompt('Enter a new variable name.', '')
+                }).success(function() {
+                    window.location = window.location;
                 });
-            }
+
+                return false;
+            });
         });
     </script>
 </html>

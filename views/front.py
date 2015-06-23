@@ -25,15 +25,22 @@ def secure_filename(filename):
 
 class Serve(Base):
     def get(self, orig):
+        data = self.db.execute('''
+            SELECT variable.name, value.value FROM value
+            LEFT JOIN variable ON variable.name == value.variable
+            LEFT JOIN domain ON domain.host == value.domain
+            WHERE domain.host LIKE ?
+        ''', ('%{}%'.format(self.request.host.split(':', 1)[0]),)).fetchall()
+
+        host = self.db.execute('''
+            SELECT * FROM domain
+            WHERE domain.host LIKE ?
+        ''', ('%{}%'.format(self.request.host.split(':', 1)[0]),)).fetchone()
+
         orig = orig if orig else 'index'
         path = orig if '.' in orig else orig + '.html'
         path = os.path.join('templates/', path)
-        data = self.db.execute('''
-            SELECT variable.name, value.value FROM value
-            LEFT JOIN variable ON variable.id == value.variable
-            LEFT JOIN domain ON domain.id == value.domain
-            WHERE domain.host LIKE ?
-        ''', ('%{}%'.format(self.request.host),))
+        path = os.path.join(host['template'], path)
 
         bindings = {name: value for (name, value) in data}
 

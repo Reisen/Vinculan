@@ -1,19 +1,19 @@
 CREATE TABLE IF NOT EXISTS variable (
-    id INTEGER PRIMARY KEY,
-    name TEXT
+    name TEXT,
+    PRIMARY KEY(name)
 );
 
 CREATE TABLE IF NOT EXISTS domain (
-    id INTEGER PRIMARY KEY,
-    host TEXT
+    host TEXT,
+    template TEXT,
+    PRIMARY KEY(host)
 );
 
 CREATE TABLE IF NOT EXISTS value (
-    id INTEGER PRIMARY KEY,
-    domain INTEGER,
-    variable INTEGER,
+    domain TEXT,
+    variable TEXT,
     value TEXT,
-    UNIQUE(domain, variable),
+    PRIMARY KEY(domain, variable),
     FOREIGN KEY(domain) REFERENCES domain(id),
     FOREIGN KEY(variable) REFERENCES variabe(id)
 );
