@@ -39,13 +39,13 @@ class Serve(Base):
 
         orig = orig if orig else 'index'
         path = orig if '.' in orig else orig + '.html'
-        path = os.path.join('templates/', path)
         path = os.path.join(host['template'], path)
+        path = os.path.join('templates/', path)
 
         bindings = {name: value for (name, value) in data}
 
-        if os.path.exists(path) and os.path.isfile(path):
-            self.template(orig + '.html', {
+        if os.path.exists(path) and os.path.isfile(path) and path.endswith('.html'):
+            self.template(path.split('/', 1)[1], {
                 'g': bindings
             })
 
