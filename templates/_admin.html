@@ -216,13 +216,14 @@
                 var $drop = $edit.find('select');
 
                 $edit.show();
+                $edit.data('for', $this.data('for'));
                 $drop.on('change', function() {
                     var $self = $(this);
 
                     $.post('/admin', {
                         '_xsrf': xsrf,
                         'method': 'template',
-                        'host': $this.data('for'),
+                        'host': $edit.data('for'),
                         'value': $self.find('option:selected').val()
                     }).success(function() {
                         $edit.hide();
