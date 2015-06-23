@@ -18,7 +18,7 @@ class Index(Base):
             bindings[domain][name] = value
 
         self.template('_admin.html', {
-            'templates': os.listdir('templates/'),
+            'templates': filter(lambda v: '.' not in v, os.listdir('templates/')),
             'domains': self.db.execute('''SELECT * FROM domain''').fetchall(),
             'variables': self.db.execute('''SELECT * FROM variable ORDER BY name ASC''').fetchall(),
             'values': dumps(bindings),
