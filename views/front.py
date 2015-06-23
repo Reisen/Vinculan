@@ -1,5 +1,6 @@
 from views import Base
 from unicodedata import normalize
+import json
 import os
 import re
 
@@ -53,3 +54,13 @@ class Serve(Base):
             self.template('index.html', {
                 'g': bindings
             })
+
+
+class Snippet(Base):
+    def get(self):
+        host = self.get_argument('host')
+        variable = self.get_argument('variable')
+        data = self.db.execute('''SELECT value.value FROM value WHERE value.domain = ? AND value.variable = ?''', (host, variable)).fetchone()
+        self.write(json.dumps({
+            'html': data['value']
+        }))

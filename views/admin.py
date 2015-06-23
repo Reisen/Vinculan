@@ -30,17 +30,19 @@ class Index(Base):
 
         if method == 'host':
             value = self.get_argument('value')
-            self.db.execute('''INSERT INTO domain VALUES (?, '')''', (value,))
+            if value != '':
+                self.db.execute('''INSERT INTO domain VALUES (?, '')''', (value,))
 
-            for variable in self.db.execute('''SELECT * FROM variable'''):
-                self.db.execute('''INSERT INTO value (domain, variable, value) VALUES (?, ?, '')''', (value, variable['name']))
+                for variable in self.db.execute('''SELECT * FROM variable'''):
+                    self.db.execute('''INSERT INTO value (domain, variable, value) VALUES (?, ?, '')''', (value, variable['name']))
 
         if method == 'bind':
             value = self.get_argument('value')
-            self.db.execute('''INSERT INTO variable VALUES (?)''', (value,))
+            if value != '':
+                self.db.execute('''INSERT INTO variable VALUES (?)''', (value,))
 
-            for domain in self.db.execute('''SELECT * FROM domain'''):
-                self.db.execute('''INSERT INTO value (domain, variable, value) VALUES (?, ?, '')''', (domain['host'], value))
+                for domain in self.db.execute('''SELECT * FROM domain'''):
+                    self.db.execute('''INSERT INTO value (domain, variable, value) VALUES (?, ?, '')''', (domain['host'], value))
 
         if method == 'save':
             host = self.get_argument('host')
@@ -52,6 +54,16 @@ class Index(Base):
             host = self.get_argument('host')
             value = self.get_argument('value')
             self.db.execute('''UPDATE domain SET template = ? WHERE host = ?''', (value, host))
+
+        if method == 'delete-site':
+            host = self.get_argument('value')
+            self.db.execute('''DELETE FROM domain WHERE host = ?''', (host,))
+            self.db.execute('''DELETE FROM value WHERE value.domain = ?''', (host,))
+
+        if method == 'delete-variable':
+            variable = self.get_argument('value')
+            self.db.execute('''DELETE FROM value WHERE value.variable = ?''', (variable,))
+            self.db.execute('''DELETE FROM variable WHERE name = ?''', (variable,))
 
         self.db.commit()
         self.write(dumps({

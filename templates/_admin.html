@@ -34,8 +34,7 @@
                     background-color: #4499CC;
                     color: white;
                     padding: 5px 10px;
-                    min-width: 200px;
-                    font-size: 14px;
+                    font-size: 13px;
                 }
 
                     table th a,
@@ -43,6 +42,7 @@
                         float: right;
                         color: white;
                         text-decoration: none;
+                        margin-left: 10px;
                     }
 
                     table td a {
@@ -79,7 +79,7 @@
                     box-shadow: 0px 0px 3px 0px #CCC inset;
                     background-color: white;
                     font-family: sans-serif;
-                    font-size: 14px;
+                    font-size: 13px;
                     padding: 10px;
                     color: #333;
                 }
@@ -105,7 +105,7 @@
                     box-shadow: 0px 0px 3px 0px #CCC inset;
                     background-color: white;
                     font-family: sans-serif;
-                    font-size: 14px;
+                    font-size: 13px;
                     height: 340px;
                     margin-bottom: 5px;
                     padding: 15px;
@@ -118,7 +118,7 @@
                     box-shadow: 0px 0px 3px 0px #CCC inset;
                     background-color: white;
                     font-family: sans-serif;
-                    font-size: 14px;
+                    font-size: 13px;
                     color: black;
                     padding: 5px;
                 }
@@ -146,16 +146,18 @@
             <tr>
                 <th>
                     Domain
-                    <a id="new-variable" href="">&gt;</a>
+                    <a id="new-variable" href="">
+                        <i class="fa fa-navicon"></i>
+                    </a>
                     <a id="new-domain" href="">
-                        <i class="fa fa-plus"></i>
+                        <i class="fa fa-external-link"></i>
                     </a>
                 </th>
 
                 {% for variable in variables %}
-                    <th>
+                    <th data-for="{{ variable.name }}">
                         {{ variable.name }}
-                        <a href="">
+                        <a class="delete-column" href="">
                             <i class="fa fa-trash"></i>
                         </a>
                     </th>
@@ -168,14 +170,23 @@
                         class="templater"
                         data-for="{{ row.grouper }}">
                         {{ row.grouper }}
-                        <a href="">x</a>
+                        <a class="delete-row" href="">
+                            <i class="fa fa-trash"></i>
+                        </a>
                     </td>
 
                     {% for variable in row.list %}
+                        {% if variable.value|detecthtml %}
+                        <td
+                            class="setter"
+                            data-for="{{ row.grouper }}"
+                            data-var="{{ variable.name }}">HTML</td>
+                        {% else %}
                         <td
                             class="setter"
                             data-for="{{ row.grouper }}"
                             data-var="{{ variable.name }}">{{ variable.value }}</td>
+                        {% endif %}
                     {% endfor %}
                 </tr>
             {% endfor %}
@@ -191,18 +202,41 @@
 
             var xsrf     = getCookie('_xsrf');
 
+            $('#editor textarea').on('keypress', function(e) {
+                if(e.keyCode === 27) {
+                    $('#editor').hide();
+                }
+            });
+
             $('.setter').on('click', function() {
                 var $this = $(this);
                 var $edit = $('#editor');
                 var $area = $edit.find('textarea');
 
+                if($this.html() === 'HTML') {
+                    $.ajax({
+                        type: 'GET',
+                        url: '/snippet',
+                        data: {
+                            'host': $this.data('for'),
+                            'variable': $this.data('var')
+                        },
+                        dataType: 'json'
+                    }).success(function(data) {
+                        $area.val(data.html);
+                    });
+                } else {
+                    $area.val($this.html());
+                }
+
                 $edit.show();
                 $area.focus();
-                $area.val($this.html());
                 $edit.data('for', $this.data('for'));
                 $edit.data('var', $this.data('var'));
                 $edit.find('button').off().on('click', function() {
-                    $this.html($area.val());
+                    if($this.html() !== 'HTML') {
+                        $this.html($area.val());
+                    }
 
                     $.post('/admin', {
                         '_xsrf': xsrf,
@@ -235,6 +269,44 @@
                         $edit.hide();
                     });
                 });
+            });
+
+            $('.delete-row').on('click', function() {
+                var $this = $(this);
+                var $row  = $this.parent();
+                var $data = $row.data('for');
+                var $prmt = window.confirm("Are you sure you want to remove this site?");
+
+                if($prmt) {
+                    $.post('/admin', {
+                        '_xsrf': xsrf,
+                        'method': 'delete-site',
+                        'value': $data
+                    }).success(function() {
+                        window.location = window.location;
+                    });
+                }
+
+                return false;
+            });
+
+            $('.delete-column').on('click', function() {
+                var $this = $(this);
+                var $row  = $this.parent();
+                var $data = $row.data('for');
+                var $prmt = window.confirm("Are you sure you want to remove this variable?");
+
+                if($prmt) {
+                    $.post('/admin', {
+                        '_xsrf': xsrf,
+                        'method': 'delete-variable',
+                        'value': $data
+                    }).success(function() {
+                        window.location = window.location;
+                    });
+                }
+
+                return false;
             });
 
             $('#new-domain').on('click', function() {

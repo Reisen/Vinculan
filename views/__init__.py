@@ -1,9 +1,17 @@
 from tornado.web import RequestHandler
 from jinja2 import FileSystemLoader, Environment
+import re
 import sqlite3
 
 
+html = re.compile(r'<(\w+).*>', re.M)
+
+def detecthtml(s):
+    return html.search(s) is not None
+
+
 template = Environment(loader = FileSystemLoader(['templates/']))
+template.filters['detecthtml'] = detecthtml
 
 
 class Base(RequestHandler):
