@@ -5,6 +5,9 @@ from json import dumps
 
 class Index(Base):
     def get(self):
+        if not self.get_secure_cookie('auth'):
+            self.redirect('/login')
+
         data = self.db.execute('''
             SELECT domain.host, variable.name, value.value FROM value
             LEFT JOIN variable ON variable.name == value.variable

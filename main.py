@@ -17,6 +17,7 @@ settings = {
     'url_map': [
         url(r'/admin/?',   admin.Index),
         url(r'/snippet/?', front.Snippet),
+        url(r'/login/?',   front.Login),
         url(r'/(.+?)?/?',  front.Serve)
     ]
 }

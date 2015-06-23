@@ -66,7 +66,7 @@
                 left: 0px;
                 right: 0px;
                 width: 1000px;
-                height: 65px;
+                height: 100px;
                 border: 1px solid #CCC;
                 background-color: white;
                 padding: 10px;
@@ -82,6 +82,7 @@
                     font-size: 13px;
                     padding: 10px;
                     color: #333;
+                    margin-bottom: 5px;
                 }
 
             #editor {
@@ -92,7 +93,7 @@
                 left: 0px;
                 right: 0px;
                 width: 1000px;
-                height: 400px;
+                height: 440px;
                 border: 1px solid #CCC;
                 background-color: white;
                 padding: 10px;
@@ -112,7 +113,8 @@
                     color: #333;
                 }
 
-                #editor button {
+                #editor button,
+                #template button {
                     width: 100%;
                     border: 1px solid #CCC;
                     box-shadow: 0px 0px 3px 0px #CCC inset;
@@ -121,6 +123,7 @@
                     font-size: 13px;
                     color: black;
                     padding: 5px;
+                    margin-bottom: 5px;
                 }
         </style>
     </head>
@@ -131,6 +134,9 @@
             <button>
                 Save
             </button>
+            <button>
+                Cancel
+            </button>
         </div>
 
         <div id="template">
@@ -140,6 +146,9 @@
                     <option>{{ template }}</option>
                 {% endfor %}
             </select>
+            <button>
+                Cancel
+            </button>
         </div>
 
         <table>
@@ -208,6 +217,14 @@
                 }
             });
 
+            $('#editor button:eq(1)').off().on('click', function() {
+                $('#editor').hide();
+            });
+
+            $('#template button').off().on('click', function() {
+                $('#template').hide();
+            });
+
             $('.setter').on('click', function() {
                 var $this = $(this);
                 var $edit = $('#editor');
@@ -233,7 +250,7 @@
                 $area.focus();
                 $edit.data('for', $this.data('for'));
                 $edit.data('var', $this.data('var'));
-                $edit.find('button').off().on('click', function() {
+                $edit.find('button:eq(0)').off().on('click', function() {
                     if($this.html() !== 'HTML') {
                         $this.html($area.val());
                     }

@@ -64,3 +64,27 @@ class Snippet(Base):
         self.write(json.dumps({
             'html': data['value']
         }))
+
+
+class Login(Base):
+    def get(self):
+        self.template('_login.html', {
+        })
+
+    def post(self):
+        username = self.get_argument('user')
+        password = self.get_argument('pass')
+
+        # REALLY BAD. NEED TO FIX THIS.
+        auths = []
+        for line in open('auths.txt', 'r'):
+            auths.append(tuple(line.split()))
+
+        print(auths)
+
+        if (username, password) in auths:
+            self.set_secure_cookie('auth', 'true')
+            self.redirect('/admin')
+
+        else:
+            self.redirect('/login')
