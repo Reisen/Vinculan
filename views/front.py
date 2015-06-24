@@ -44,8 +44,9 @@ class Serve(Base):
         path = os.path.join('templates/', path)
 
         bindings = {name: value for (name, value) in data}
+        bindings['domain'] = self.request.host.split(':', 1)[0]
 
-        if os.path.exists(path) and os.path.isfile(path) and path.endswith('.html'):
+        if os.path.exists(path) and os.path.isfile(path):
             self.template(path.split('/', 1)[1], {
                 'g': bindings
             })
@@ -79,8 +80,6 @@ class Login(Base):
         auths = []
         for line in open('auths.txt', 'r'):
             auths.append(tuple(line.split()))
-
-        print(auths)
 
         if (username, password) in auths:
             self.set_secure_cookie('auth', 'true')

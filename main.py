@@ -61,5 +61,19 @@ if __name__ == '__main__':
         db.executescript(f.read())
 
     app = Application(settings['url_map'], **settings)
+
+    # Overwrite the Mod Handlers thanks to Tornado being opinionated.
+    mod_handlers = []
+
+    for handler, rules in app.handlers:
+        handlers = []
+        for rule in rules:
+            if 'robots' not in rule.regex.pattern and 'favicon' not in rule.regex.pattern:
+                handlers.append(rule)
+
+        mod_handlers.append((handler, handlers))
+
+    app.handlers = mod_handlers
+
     app.listen(8001)
     IOLoop.current().start()
