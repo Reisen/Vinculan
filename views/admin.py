@@ -9,7 +9,7 @@ class Index(Base):
             self.redirect('/login')
 
         data = self.db.execute('''
-            SELECT domain.host, variable.name, value.value FROM value
+            SELECT domain.host, domain.template, variable.name, value.value FROM value
             LEFT JOIN variable ON variable.name == value.variable
             LEFT JOIN domain ON domain.host == value.domain
             ORDER BY domain.host, variable.name ASC
@@ -17,7 +17,8 @@ class Index(Base):
 
         bindings = defaultdict(dict)
 
-        for (domain, name, value) in data:
+        for (domain, template, name, value) in data:
+            bindings[domain]['template'] = template
             bindings[domain][name] = value
 
         self.template('_admin.html', {

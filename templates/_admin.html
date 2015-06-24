@@ -145,7 +145,7 @@
 
         <div id="template">
             <select>
-                <option>default</option>
+                <option value="default">default</option>
                 {% for template in templates %}
                     <option>{{ template }}</option>
                 {% endfor %}
@@ -187,6 +187,8 @@
                             <i class="fa fa-trash"></i>
                         </a>
                     </td>
+
+                    <td>{{ row.list[0].template }}</td>
 
                     {% for variable in row.list %}
                         {% if variable.value|detecthtml %}
@@ -287,6 +289,7 @@
                         'host': $edit.data('for'),
                         'value': $self.find('option:selected').val()
                     }).success(function() {
+                        $drop.val("default");
                         $edit.hide();
                     });
                 });
