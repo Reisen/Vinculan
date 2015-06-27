@@ -4,14 +4,59 @@ import re
 import sqlite3
 
 
+#-------------------------------------------------------------------------------
+
+
+import smtplib
+
+class Mail:
+    def __init__(self):
+        self.server = smtplib.SMTP(settings['smtp_host'], settings['smtp_port'])
+        self.server.ehlo()
+        self.server.starttls()
+        self.server.login(settings['user'], settings['pass'])
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.server.close()
+
+    def mail(self, message, **kwargs):
+        headers = '\n'.join(': '.join(header) for header in kwargs.items())
+        message = "{}\n\n{}".format(headers, message)
+        self.server.sendmail(
+            kwargs.get('From', settings['smtp_from']),
+            kwargs.get('To', '').split(', '),
+            message
+        )
+
+
+#-------------------------------------------------------------------------------
+
+
 html = re.compile(r'<(\w+).*>', re.M)
 
 def detecthtml(s):
     return html.search(s) is not None
 
+def print_template(s, to, frm, subject):
+    with Mail() as mail:
+        mail.mail(s, **{
+            'To': to,
+            'From': frm,
+            'Subject': subject
+        })
+
+    return ''
+
 
 template = Environment(loader = FileSystemLoader(['templates/']))
 template.filters['detecthtml'] = detecthtml
+template.filters['sendmail'] = print_template
+
+
+#-------------------------------------------------------------------------------
 
 
 class Base(RequestHandler):
@@ -24,7 +69,13 @@ class Base(RequestHandler):
 
     def template(self, name, args):
         args['xsrf'] = self.xsrf_token.decode('UTF-8')
+        args['this'] = self
         self.write(template.get_template(name).render(args))
+
+    def confirm_captcha(self):
+        value = self.get_secure_cookie('captcha')
+        atmpt = self.get_argument('captcha')
+        return value == atmpt
 
 
 from views import front, admin

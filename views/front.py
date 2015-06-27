@@ -87,3 +87,16 @@ class Login(Base):
 
         else:
             self.redirect('/login')
+
+
+class Captcha(Base):
+    def get(self):
+        from io import BytesIO
+        from captcha.image import ImageCaptcha
+        from random import randrange
+        value = str(randrange(1000, 10000))
+        image = ImageCaptcha()
+        image = image.generate(value)
+        self.set_secure_cookie('captcha', value)
+        self.set_header('Content-Type', 'image/png')
+        self.write(image.read())

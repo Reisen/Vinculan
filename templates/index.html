@@ -1,3 +1,13 @@
-Wow woah!
-{{ g.title }}
-{{ g.title }}
+{% macro email() %}
+    This is HTML
+{% endmacro %}
+
+{% if this.confirm_captcha() %}
+    {{
+        email()|sendmail(
+            this.get_argument('address'),
+            'foo@bar.com',
+            'Subject'
+        )
+    }}
+{% endif %}
