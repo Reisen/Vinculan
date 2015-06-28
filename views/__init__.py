@@ -12,12 +12,14 @@ html = re.compile(r'<(\w+).*>', re.M)
 def detecthtml(s):
     return html.search(s) is not None
 
+
 def print_template(s, to, frm, subject):
     with Mail() as mail:
         mail.mail(s, **{
             'To': to,
             'From': frm,
-            'Subject': subject
+            'Subject': subject,
+            'Content-Type': 'text/html'
         })
 
     return ''
