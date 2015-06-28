@@ -2,6 +2,8 @@ from tornado.web import RequestHandler
 from jinja2 import FileSystemLoader, Environment
 import re
 import sqlite3
+import time
+import datetime
 
 
 html = re.compile(r'<(\w+).*>', re.M)
@@ -10,8 +12,15 @@ def detecthtml(s):
     return html.search(s) is not None
 
 
+def datetimeformat(format):
+    ctime = time.time()
+    ctime = datetime.datetime.fromtimestamp(ctime)
+    return ctime.strftime(format)
+
+
 template = Environment(loader = FileSystemLoader(['templates/']))
 template.filters['detecthtml'] = detecthtml
+template.filters['strftime'] = datetimeformat
 
 
 class Base(RequestHandler):
