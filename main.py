@@ -6,7 +6,6 @@ try:
     from settings import settings
 
 except:
-    print('Default Settings Loaded')
     settings = {
         'smtp_host': '',
         'smtp_port': 587,
