@@ -54,7 +54,7 @@ class Base(RequestHandler):
         self.write(template.get_template(name).render(args))
 
     def confirm_captcha(self):
-        value = self.get_secure_cookie('captcha')
+        value = self.get_secure_cookie('captcha').decode('UTF-8')
         atmpt = self.get_argument('captcha')
         return value == atmpt
 

@@ -56,6 +56,9 @@ class Serve(Base):
                 'g': bindings
             })
 
+    def post(self, orig):
+        self.get(orig)
+
 
 class Snippet(Base):
     def get(self):
