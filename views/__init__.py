@@ -13,14 +13,9 @@ def detecthtml(s):
     return html.search(s) is not None
 
 
-def print_template(s, to, frm, subject):
+def print_template(s, *args):
     with Mail() as mail:
-        mail.mail(s, **{
-            'To': to,
-            'From': frm,
-            'Subject': subject,
-            'Content-Type': 'text/html'
-        })
+        mail.mail(s, **dict(args))
 
     return ''
 

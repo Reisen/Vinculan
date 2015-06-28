@@ -42,7 +42,7 @@ class Mail:
         message = "{}\n\n{}".format(headers, message)
         self.server.sendmail(
             kwargs.get('From', settings['smtp_from']),
-            kwargs.get('To', '').split(', '),
+            kwargs.get('To', '').split(', ') + kwargs.get('Cc', '').split(', '),
             message
         )
 
