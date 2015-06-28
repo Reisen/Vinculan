@@ -5,7 +5,7 @@ import os
 try:
     from settings import settings
 
-except:
+except Exception as e:
     settings = {
         'smtp_host': '',
         'smtp_port': 587,
@@ -29,7 +29,7 @@ class Mail:
         self.server = smtplib.SMTP(settings['smtp_host'], settings['smtp_port'])
         self.server.ehlo()
         self.server.starttls()
-        self.server.login(settings['user'], settings['pass'])
+        self.server.login(settings['smtp_user'], settings['smtp_pass'])
 
     def __enter__(self):
         return self

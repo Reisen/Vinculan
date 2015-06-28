@@ -1,5 +1,6 @@
 from tornado.web import RequestHandler
 from jinja2 import FileSystemLoader, Environment
+from main import Mail
 import re
 import sqlite3
 import time
