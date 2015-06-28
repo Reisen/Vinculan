@@ -2,18 +2,22 @@ from tornado.ioloop import IOLoop
 from tornado.web import Application, url
 import os
 
+try:
+    from settings import settings
 
-settings = {
-    'smtp_host': '',
-    'smtp_port': 587,
-    'smtp_user': '',
-    'smtp_pass': '',
-    'smtp_from': '',
-    'cookie_secret': b'\r\xc7\xa0\x1d:\xa32\x12\x82q\x89\x8d\xe9ZP1G\xe2f\xa0\x83\x0bB\xa99\x11e\x1a^\xd9\x16)',
-    'xsrf_cookies': True,
-    'static_path': os.path.join(os.path.dirname(__file__), 'assets'),
-    'autoreload': True
-}
+except:
+    print('Default Settings Loaded')
+    settings = {
+        'smtp_host': '',
+        'smtp_port': 587,
+        'smtp_user': '',
+        'smtp_pass': '',
+        'smtp_from': '',
+        'cookie_secret': b'\r\xc7\xa0\x1d:\xa32\x12\x82q\x89\x8d\xe9ZP1G\xe2f\xa0\x83\x0bB\xa99\x11e\x1a^\xd9\x16)',
+        'xsrf_cookies': True,
+        'static_path': os.path.join(os.path.dirname(__file__), 'assets'),
+        'autoreload': True
+    }
 
 
 #-------------------------------------------------------------------------------
