@@ -26,6 +26,8 @@ class Index(Base):
             'domains': self.db.execute('''SELECT * FROM domain''').fetchall(),
             'variables': self.db.execute('''SELECT * FROM variable ORDER BY name ASC''').fetchall(),
             'values': dumps(bindings),
+            'order': self.get_argument('order', False),
+            'direction': self.get_argument('direction', 0),
             'all': data
         })
 
