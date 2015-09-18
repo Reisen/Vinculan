@@ -8,6 +8,16 @@
                 box-sizing: border-box;
             }
 
+            .cf:before,
+            .cf:after {
+                content: ' ';
+                display: table;
+            }
+
+            .cf:after {
+                clear: both;
+            }
+
             body,
             html {
                 margin: 0px;
@@ -65,6 +75,31 @@
                     }
 
                 table tr td {
+                }
+
+            #controller {
+                width: 550px;
+                margin-bottom: 10px;
+                border: 1px solid #CCC;
+                padding: 10px 10px;
+            }
+
+                #controller > div {
+                    width: 150px;
+                    float: left;
+                    margin-right: 15px;
+                    margin-bottom: 0px;
+                    line-height: 10px;
+                    padding: 0px 10px;
+                    border-right: 1px solid #CCC;
+                }
+
+                #controller > div:nth-of-type(3n) {
+                    border-right: 0px;
+                }
+
+                #controller input {
+                    float: right;
                 }
 
             #template {
@@ -138,6 +173,8 @@
     </head>
 
     <body>
+        This: {{ this.request.query }}
+
         <div id="editor">
             <textarea></textarea>
             <button>
@@ -158,6 +195,15 @@
             <button>
                 Cancel
             </button>
+        </div>
+
+        <div id="controller" class="cf">
+            {% for variable in variables %}
+            <div>
+                <label>{{ variable.name }}</label>
+                <input checked type="checkbox" name="{{ variable.name }}"/>
+            </div>
+            {% endfor %}
         </div>
 
         <table>
@@ -368,6 +414,38 @@
 
                 return false;
             });
+
+            var displayMap = {};
+
+            function updateView() {
+                for(name in displayMap) {
+                    $('table td, table th').each(function(v, k) {
+                        var element = $(k);
+                        if(element.data('var') == name || element.data('for') == name) {
+                            element.css({
+                                'display': (displayMap[name] === true) ?
+                                    'table-cell' : 'none'
+                            });
+                        }
+                    });
+                }
+            }
+
+            $('#controller input[type=checkbox]').each(function(v, k) {
+                var element = $(k);
+
+                // Get Initial State
+                displayMap[element.attr('name')] = element.prop('checked');
+
+                // Get State on Change, Update View.
+                element.on('change', function() {
+                    var element = $(this);
+                    displayMap[element.attr('name')] = element.prop('checked');
+                    updateView();
+                });
+            });
+
+            updateView();
         });
     </script>
 </html>

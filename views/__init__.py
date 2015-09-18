@@ -26,6 +26,10 @@ def datetimeformat(format):
     return ctime.strftime(format)
 
 
+def update_uri(s, part):
+    pass
+
+
 template = Environment(loader = FileSystemLoader(['templates/']))
 template.filters['detecthtml'] = detecthtml
 template.filters['strftime'] = datetimeformat
