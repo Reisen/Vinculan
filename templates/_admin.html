@@ -26,11 +26,8 @@
                 font-size: 12px;
             }
 
-            body {
-                margin: 10px;
-            }
-
             table {
+                margin-left: 200px;
                 width: auto;
                 border-spacing: 0px;
                 border-collapse: separate;
@@ -40,19 +37,21 @@
                     text-align: left;
                     color: #4499FF;
                     font-weight: normal;
-                    border-bottom: 4px solid #336699;
-                    background-color: #4499CC;
+                    border-bottom: 0px solid #336699;
+                    background-color: #121219;
                     color: white;
-                    padding: 5px 10px;
+                    padding: 10px 10px;
                     font-size: 13px;
+                    white-space: nowrap;
+                    text-align: right;
+                    border-right: 1px solid #444;
                 }
 
                     table th a,
                     table td a {
-                        float: right;
                         color: white;
                         text-decoration: none;
-                        margin-left: 10px;
+                        margin-left: 5px;
                     }
 
                     table td a {
@@ -64,43 +63,101 @@
                         margin: 0px;
                     }
 
-                table td {
-                    padding: 7px 10px;
-                    border-bottom: 1px solid #D9D9D9;
+                table tr:nth-of-type(2n + 1) td {
+                    background-color: #EEF;
                 }
 
-                    table td:hover {
+                table td {
+                    padding: 7px 10px;
+                    border-right: 1px solid #DDDDFF;
+                }
+
+                    table tr:hover td {
                         cursor: pointer;
-                        background-color: #F5F5F5;
+                        background-color: #121219 !important;
+                        color: white;
+                        border-right: 1px solid #444;
                     }
+
+                table td:first-of-type {
+                    text-align: right;
+                    white-space: nowrap;
+                }
 
                 table tr td {
                 }
 
-            #controller {
-                width: 550px;
-                margin-bottom: 10px;
-                border: 1px solid #CCC;
-                padding: 10px 10px;
+            #sidebar {
+                width: 200px;
+                margin-right: 1px solid #CCC;
+                height: 100%;
+                position: fixed;
+                background-color: #121219;
+                top: 0px;
+                left: 0px;
+                padding: 10px;
+                z-index: 3;
             }
 
-                #controller > div {
-                    width: 150px;
-                    float: left;
-                    margin-right: 15px;
-                    margin-bottom: 0px;
-                    line-height: 10px;
-                    padding: 0px 10px;
-                    border-right: 1px solid #CCC;
+            #search_controller {
+            }
+
+                #search_controller h1 {
+                    color: white;
+                    margin: 0px;
+                    padding: 0px;
+                    font-weight: normal;
+                    font-size: 15px;
+                    line-height: 25px;
                 }
 
-                #controller > div:nth-of-type(3n) {
+            #search {
+                width: 100%;
+                border: 1px solid black;
+                background-color: #111114;
+                color: #CCC;
+                padding: 5px 5px;
+                margin-bottom: 5px;
+            }
+
+            #controller {
+            }
+
+                #controller h1 {
+                    color: white;
+                    margin: 0px;
+                    padding: 0px;
+                    font-weight: normal;
+                    font-size: 15px;
+                    margin-top: 15px;
+                    line-height: 25px;
+                }
+
+                #controller > div {
+                    margin: 0px;
+                    background-color: #111112;
+                    border: 1px solid black;
+                    padding-left: 5px;
+                    margin-bottom: 3px;
+                    color: white;
+                    line-height: 22px;
+                }
+
+                    #controller > div input {
+                        float: right;
+                        margin-top: 4px;
+                    }
+
+                    #controller > div label {
+                    }
+
+                /*#controller > div:nth-of-type(3n) {
                     border-right: 0px;
                 }
 
                 #controller input {
                     float: right;
-                }
+                }*/
 
             #template {
                 position: fixed;
@@ -115,6 +172,7 @@
                 background-color: white;
                 padding: 10px;
                 display: none;
+                z-index: 4;
             }
 
                 #template select {
@@ -142,7 +200,7 @@
                 background-color: white;
                 padding: 10px;
                 display: none;
-                z-index: 1;
+                z-index: 4;
             }
 
                 #editor textarea {
@@ -196,13 +254,22 @@
             </button>
         </div>
 
-        <div id="controller" class="cf">
-            {% for variable in variables %}
-            <div>
-                <label>{{ variable.name }}</label>
-                <input checked type="checkbox" name="{{ variable.name }}"/>
+        <div id="sidebar">
+            <div id="search_controller" class="cf">
+                <h1>Filter</h1>
+                <input type="text" placeholder="Search terms." id="search"/>
             </div>
-            {% endfor %}
+
+            <div id="controller" class="cf">
+                <h1>Columns</h1>
+
+                {% for variable in variables %}
+                <div class="cf">
+                    <label>{{ variable.name }}</label>
+                    <input checked type="checkbox" name="{{ variable.name }}"/>
+                </div>
+                {% endfor %}
+            </div>
         </div>
 
         <table>
@@ -391,12 +458,35 @@
             });
 
             $('#new-domain').on('click', function() {
+                var domain = window.prompt('Enter a new domain name.', '');
+
+                function modifyData(o) {
+                    o.find('td').each(function(id, v) {
+                        var $item = $(v);
+
+                        if($item.hasClass('setter')) {
+                            $item.data('for', domain);
+                            $item.html('');
+                        }
+
+                        if($item.hasClass('templater')) {
+                            $item.data('for', domain);
+                            $item.contents().first().replaceWith(domain);
+                        }
+                    });
+
+                    return o;
+                }
+
                 $.post('/admin', {
                     '_xsrf': xsrf,
                     'method': 'host',
-                    'value': window.prompt('Enter a new domain name.', '')
+                    'value': domain
                 }).success(function() {
-                    window.location = window.location;
+                    //window.location = window.location;
+                    modifyData($('table tr:last-of-type')
+                        .clone(true, true))
+                        .insertAfter('table tr:first-of-type');
                 });
 
                 return false;
@@ -429,6 +519,39 @@
                     });
                 }
             }
+
+            function updateSearch() {
+                var search_term = $('#search').val();
+
+                if(search_term === '') {
+                    $('tr').css({
+                        'display': 'table-row'
+                    });
+
+                    return;
+                }
+
+                $('tr').slice(1).each(function(id, v) {
+                    var matched = false;
+
+                    $(v).find('td').each(function(id, v) {
+                        var item$ = $(v);
+
+                        if(item$.html().indexOf(search_term) !== -1) {
+                            matched = true;
+                            return false;
+                        }
+                    });
+
+                    $(v).css({
+                        'display': matched ? 'table-row' : 'none'
+                    });
+                });
+            }
+
+            $('#search').on('keyup', function() {
+                updateSearch();
+            });
 
             $('#controller input[type=checkbox]').each(function(v, k) {
                 var element = $(k);
