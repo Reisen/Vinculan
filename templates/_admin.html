@@ -486,7 +486,10 @@
                     //window.location = window.location;
                     modifyData($('table tr:last-of-type')
                         .clone(true, true))
-                        .insertAfter('table tr:first-of-type');
+                        .insertAfter('table tr:first-of-type')
+                        .css({
+                            'display': 'table-row'
+                        });
                 });
 
                 return false;
