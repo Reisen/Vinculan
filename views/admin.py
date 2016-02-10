@@ -75,3 +75,27 @@ class Index(Base):
         self.write(dumps({
             'status': 'success'
         }))
+
+class SubIndex:
+    def get(self, domain):
+        if not self.get_secure_cookie('auth'):
+            self.redirect('/login')
+
+        data = self.db.execute('''
+            SELECT page, variable, vale FROM page
+            WHERE domain = ?
+            ORDER BY page, variable ASC
+        ''').fetchall()
+
+        bindings = defaultdict(dict)
+        
+        for (page, variable, value) in data:
+            bindings[page][variable] = value
+
+        self.template('_subadmin.html', {
+            'templates': filter(lambda v: '.' not in v, os.listdir('templates/')),
+            'values': dumps(bindings),
+            'order': self.get_argument('order', False),
+            'direction': self.get_argument('direction', 0),
+            'all': data
+        })

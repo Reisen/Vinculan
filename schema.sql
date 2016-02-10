@@ -17,3 +17,12 @@ CREATE TABLE IF NOT EXISTS value (
     FOREIGN KEY(domain) REFERENCES domain(id),
     FOREIGN KEY(variable) REFERENCES variabe(id)
 );
+
+CREATE TABLE IF NOT EXISTS page (
+    domain TEXT,
+    page TEXT,
+    variable TEXT,
+    value TEXT,
+    PRIMARY KEY(domain, page, variable),
+    FOREIGN KEY(domain) REFERENCES domain(id)
+);

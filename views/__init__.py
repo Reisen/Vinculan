@@ -48,8 +48,8 @@ class Base(RequestHandler):
         self.db.close()
 
     def template(self, name, args):
-        args['xsrf'] = self.xsrf_token.decode('UTF-8')
         args['this'] = self
+        args['xsrf'] = self.xsrf_token.decode('UTF-8')
         self.write(template.get_template(name).render(args))
 
     def confirm_captcha(self):

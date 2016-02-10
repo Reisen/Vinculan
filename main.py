@@ -54,11 +54,12 @@ if __name__ == '__main__':
     from views import *
 
     settings['url_map'] = [
-        url(r'/admin/?',   admin.Index, name = 'admin'),
-        url(r'/snippet/?', front.Snippet, name = 'snippet'),
-        url(r'/login/?',   front.Login, name = 'login'),
-        url(r'/captcha/?', front.Captcha, name = 'captcha'),
-        url(r'/(.+?)?/?',  front.Serve, name = 'serve'),
+        url(r'/admin/(.+)/?', admin.SubIndex, name = 'subadmin'),
+        url(r'/admin/?',      admin.Index, name = 'admin'),
+        url(r'/snippet/?',    front.Snippet, name = 'snippet'),
+        url(r'/login/?',      front.Login, name = 'login'),
+        url(r'/captcha/?',    front.Captcha, name = 'captcha'),
+        url(r'/(.+?)?/?',     front.Serve, name = 'serve'),
     ]
 
     with open('schema.sql') as f:
