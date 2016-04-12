@@ -76,26 +76,84 @@ class Index(Base):
             'status': 'success'
         }))
 
+
 class SubIndex:
     def get(self, domain):
         if not self.get_secure_cookie('auth'):
             self.redirect('/login')
 
+        variables = set(self.db.execute('''SELECT * FROM variable ORDER BY name ASC''').fetchall())
+
         data = self.db.execute('''
-            SELECT page, variable, vale FROM page
+            SELECT page, variable, value FROM page
             WHERE domain = ?
             ORDER BY page, variable ASC
-        ''').fetchall()
+        ''', (domain,)).fetchall()
 
         bindings = defaultdict(dict)
         
         for (page, variable, value) in data:
             bindings[page][variable] = value
 
-        self.template('_subadmin.html', {
+        self.template('_admin.html', {
             'templates': filter(lambda v: '.' not in v, os.listdir('templates/')),
+            'domains': self.db.execute('''SELECT * FROM domain''').fetchall(),
+            'variables': variables,
             'values': dumps(bindings),
             'order': self.get_argument('order', False),
             'direction': self.get_argument('direction', 0),
             'all': data
         })
+
+        #self.template('_subadmin.html', {
+        #    'templates': filter(lambda v: '.' not in v, os.listdir('templates/')),
+        #    'values': dumps(bindings),
+        #    'order': self.get_argument('order', False),
+        #    'direction': self.get_argument('direction', 0),
+        #    'all': data
+        #})
+
+    def post(self, domain):
+        method = self.get_argument('method')
+
+        if method == 'host':
+            value = self.get_argument('value')
+            if value != '':
+                self.db.execute('''INSERT INTO page VALUES (?, '')''', (value,))
+
+                for variable in self.db.execute('''SELECT * FROM variable'''):
+                    self.db.execute('''INSERT INTO value (domain, variable, value) VALUES (?, ?, '')''', (value, variable['name']))
+
+        if method == 'bind':
+            value = self.get_argument('value')
+            if value != '':
+                self.db.execute('''INSERT INTO variable VALUES (?)''', (value,))
+
+                for domain in self.db.execute('''SELECT * FROM domain'''):
+                    self.db.execute('''INSERT INTO value (domain, variable, value) VALUES (?, ?, '')''', (domain['host'], value))
+
+        if method == 'save':
+            host = self.get_argument('host')
+            bind = self.get_argument('bind')
+            value = self.get_argument('value')
+            self.db.execute('''INSERT OR REPLACE INTO value (domain, variable, value) VALUES (?, ?, ?)''', (host, bind, value))
+
+        if method == 'template':
+            host = self.get_argument('host')
+            value = self.get_argument('value')
+            self.db.execute('''UPDATE domain SET template = ? WHERE host = ?''', (value, host))
+
+        if method == 'delete-site':
+            host = self.get_argument('value')
+            self.db.execute('''DELETE FROM domain WHERE host = ?''', (host,))
+            self.db.execute('''DELETE FROM value WHERE value.domain = ?''', (host,))
+
+        if method == 'delete-variable':
+            variable = self.get_argument('value')
+            self.db.execute('''DELETE FROM value WHERE value.variable = ?''', (variable,))
+            self.db.execute('''DELETE FROM variable WHERE name = ?''', (variable,))
+
+        self.db.commit()
+        self.write(dumps({
+            'status': 'success'
+        }))
