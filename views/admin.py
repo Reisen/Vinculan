@@ -77,7 +77,7 @@ class Index(Base):
         }))
 
 class SubIndex(Base):
-    def get(self):
+    def get(self, domain):
         try:
             if not self.get_secure_cookie('auth'):
                 self.redirect('/login')
