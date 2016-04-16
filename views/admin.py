@@ -76,8 +76,34 @@ class Index(Base):
             'status': 'success'
         }))
 
-
 class SubIndex:
+    def get(self):
+        if not self.get_secure_cookie('auth'):
+            self.redirect('/login')
+
+        data = self.db.execute('''
+            SELECT domain.host, page.name as template, pagevar.name, pageval.value FROM pageval
+            LEFT JOIN pagevar ON pagevar.name == pageval.variable AND pagevar.page == pageval.page
+            LEFT JOIN domain ON domain.host == pageval.domain
+            ORDER BY page.name, variable.name ASC
+        ''').fetchall()
+
+        bindings = defaultdict(dict)
+
+        for (domain, page, name, value) in data:
+            bindings[page][name] = value
+
+        self.template('_admin.html', {
+            'templates': filter(lambda v: '.' not in v, os.listdir('templates/')),
+            'domains': self.db.execute('''SELECT * FROM page''').fetchall(),
+            'variables': self.db.execute('''SELECT * FROM pagevar ORDER BY name ASC''').fetchall(),
+            'values': dumps(bindings),
+            'order': self.get_argument('order', False),
+            'direction': self.get_argument('direction', 0),
+            'all': data
+            })
+
+class SubDIndex:
     def get(self, domain):
         try:
             if not self.get_secure_cookie('auth'):

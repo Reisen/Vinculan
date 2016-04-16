@@ -28,10 +28,16 @@ CREATE TABLE IF NOT EXISTS page (
 CREATE TABLE IF NOT EXISTS pagevar (
     name TEXT,
     domain TEXT,
-    page TEXT,
-    PRIMARY KEY(name, domain, page),
-    FOREIGN KEY(domain, page) REFERENCES page(domain, page)
+    PRIMARY KEY(name, domain),
+    FOREIGN KEY(domain) REFERENCES page(domain)
 );
 
 CREATE TABLE IF NOT EXISTS pageval (
+    domain TEXT,
+    page TEXT,
+    variable TEXT,
+    value TEXT,
+    PRIMARY KEY(domain, page, variable),
+    FOREIGN KEY(domain) REFERENCES domain(id),
+    FOREIGN KEY(variable) REFERENCES pagevar(id)
 );
