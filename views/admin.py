@@ -76,7 +76,7 @@ class Index(Base):
             'status': 'success'
         }))
 
-class SubIndex:
+class SubIndex(Base):
     def get(self):
         try:
             if not self.get_secure_cookie('auth'):
@@ -106,6 +106,8 @@ class SubIndex:
 
         except Exception as e:
             self.write(str(e))
+
+
 class SubDIndex:
     def get(self, domain):
         try:
