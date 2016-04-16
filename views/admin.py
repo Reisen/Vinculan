@@ -86,8 +86,8 @@ class SubIndex(Base):
                 SELECT page.page as host, page.domain, pagevar.name, pageval.value FROM pageval
                 LEFT JOIN pagevar ON pagevar.name == pageval.variable AND pagevar.domain = pageval.domain
                 LEFT JOIN page ON page.page == pageval.page
-                ORDER BY page.page, pagevar.name ASC
                 WHERE pageval.domain = ?
+                ORDER BY page.page, pagevar.name ASC
             ''', (domain,)).fetchall()
 
             bindings = defaultdict(dict)
