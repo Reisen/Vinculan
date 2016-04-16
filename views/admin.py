@@ -85,7 +85,7 @@ class SubIndex(Base):
             data = self.db.execute('''
                 SELECT domain.host, page.page as template, pagevar.name, pageval.value FROM pageval
                 LEFT JOIN pagevar ON pagevar.name == pageval.variable AND pagevar.page == pageval.page
-                LEFT JOIN domain ON domain.host == pageval.domain
+                LEFT JOIN page ON page.domain == pageval.domain
                 ORDER BY page.name, variable.name ASC
             ''').fetchall()
 
