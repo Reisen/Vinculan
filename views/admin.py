@@ -87,6 +87,7 @@ class SubIndex(Base):
                 LEFT JOIN pagevar ON pagevar.name == pageval.variable AND pagevar.domain = pageval.domain
                 LEFT JOIN page ON page.page == pageval.page
                 ORDER BY page.page, pagevar.name ASC
+                WHERE pageval.domain = ?
             ''', (domain,)).fetchall()
 
             bindings = defaultdict(dict)
