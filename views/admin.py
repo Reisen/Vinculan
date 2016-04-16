@@ -83,7 +83,7 @@ class SubIndex(Base):
                 self.redirect('/login')
 
             data = self.db.execute('''
-                SELECT page.page as host, domain.template, pagevar.name, pageval.value FROM pageval
+                SELECT page.page as host, page.domain, pagevar.name, pageval.value FROM pageval
                 LEFT JOIN pagevar ON pagevar.name == pageval.variable AND pagevar.domain = pageval.domain
                 LEFT JOIN page ON page.page == pageval.page
                 ORDER BY page.page, variable.name ASC
