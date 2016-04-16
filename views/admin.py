@@ -79,31 +79,36 @@ class Index(Base):
 
 class SubIndex:
     def get(self, domain):
-        if not self.get_secure_cookie('auth'):
-            self.redirect('/login')
+        try:
+            if not self.get_secure_cookie('auth'):
+                self.redirect('/login')
 
-        variables = set(self.db.execute('''SELECT * FROM variable ORDER BY name ASC''').fetchall())
+            variables = set()
 
-        data = self.db.execute('''
-            SELECT page, variable, value FROM page
-            WHERE domain = ?
-            ORDER BY page, variable ASC
-        ''', (domain,)).fetchall()
+            data = self.db.execute('''
+                SELECT page, variable, value FROM page
+                WHERE domain = ?
+                ORDER BY page, variable ASC
+            ''', (domain,)).fetchall()
 
-        bindings = defaultdict(dict)
+            bindings = defaultdict(dict)
         
-        for (page, variable, value) in data:
-            bindings[page][variable] = value
+            for (page, variable, value) in data:
+                bindings[page][variable] = value
+                variables.add(variable)
 
-        self.template('_admin.html', {
-            'templates': filter(lambda v: '.' not in v, os.listdir('templates/')),
-            'domains': self.db.execute('''SELECT * FROM domain''').fetchall(),
-            'variables': variables,
-            'values': dumps(bindings),
-            'order': self.get_argument('order', False),
-            'direction': self.get_argument('direction', 0),
-            'all': data
-        })
+            self.template('_admin.html', {
+                'templates': filter(lambda v: '.' not in v, os.listdir('templates/')),
+                'domains': self.db.execute('''SELECT * FROM domain''').fetchall(),
+                'variables': variables,
+                'values': dumps(bindings),
+                'order': self.get_argument('order', False),
+                'direction': self.get_argument('direction', 0),
+                'all': data
+            })
+
+        except Exception as e:
+            self.write('Exception: ' + str(e))
 
         #self.template('_subadmin.html', {
         #    'templates': filter(lambda v: '.' not in v, os.listdir('templates/')),
