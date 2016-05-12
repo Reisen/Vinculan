@@ -1,0 +1,234 @@
+<!doctype html>
+<html>
+	<head>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+	    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<style>
+			body { margin-top: 40px; }
+		</style>
+	</head>
+
+	<body>
+		<div id="interface" class="container">
+		</div>
+	</body>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
+	<script type="text/babel">
+		function getCookie(name) {
+            var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+            return r ? r[1] : undefined;
+        }
+
+        var xsrf = getCookie('_xsrf');
+
+
+
+
+
+		var Groups = {{ groups }};
+
+		var RowState = React.createClass({
+			componentDidMount() {
+				var $dom = $(ReactDOM.findDOMNode(this));
+				var self = this;
+
+				$dom.find('select').material_select();
+				$dom.find('select').on('change', function() {
+					if(this.value !== '') {
+						self.props.loadRows(this.value);
+						return;
+					}
+
+					self.props.createGroup(window.prompt('Name of new Group'));
+				})
+			},
+
+			render() {
+				var Options = this.props.data.map((option) => {
+					return (
+						<option key={option.name} value={option.name}>
+							{option.name}
+						</option>
+					);
+				});
+
+				return (
+					<div className="row">
+						<form className="col s12">
+							<div className="row">
+								<div className="input-field col s2">
+									<select>
+										<option value="" selected disabled>Choose Group</option>
+										<option value="">New Group</option>
+										{Options}
+									</select>
+									<label>Group</label>
+								</div>
+
+								<div className="input-field col s10">
+									<input type="text"/>
+									<label>Search</label>
+								</div>
+							</div>
+
+							<div className="row">
+								<a href="#" className="col s2 btn-flat">Add Domain</a>
+							</div>
+						</form>
+					</div>
+				);
+			}
+		});
+
+		var Row = React.createClass({
+			deleteRow() {
+				alert('Deleting...');
+			},
+
+			componentDidMount() {
+				var $this = $(ReactDOM.findDOMNode(this));
+				$this.leanModal();
+			},
+
+			render() {
+				return (
+					<a href="#editor" className="collection-item">
+						{this.props.name}
+						<span className="secondary-content" onClick={this.deleteRow}>
+							<i className="material-icons">content_copy</i>
+							<i className="material-icons">delete</i>
+						</span>
+					</a>
+				);
+			}
+		})
+
+		var RowView = React.createClass({
+			deleteRow() {
+				alert(this);
+			},
+
+			render() {
+				var Rows = this.props.data.map((row) => {
+					return (
+						<Row name={row.name} key={row.name}/>
+					);
+				})
+
+				return (
+					<div className="collection">
+						{Rows}
+					</div>
+				);
+			}
+		})
+
+		var RowEditor = React.createClass({
+			render() {
+				return (
+					<div className="modal modal-fixed-footer" id="editor">
+						<div className="modal-content">
+							<div className="row">
+								<ul className="col s2">
+									<li>Pages</li>
+									<li> / </li>
+									<li> /london </li>
+									<li> /saved </li>
+								</ul>
+
+								<div className="col s10">
+									<form>
+										<div className="input-field">
+											<input type="text"/>
+											<label>Name</label>
+										</div>
+
+										<div className="input-field">
+											<input type="text"/>
+											<label>Location</label>
+										</div>
+
+										<div className="input-field">
+											<input type="text"/>
+											<label>PhoneNumber</label>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+
+						<div className="modal-footer">
+							<a href="#" className="modal-action modal-close btn">Save</a>
+							<a href="#" className="modal-action btn-flat">Clone Site</a>
+							<a href="#" className="modal-action btn-flat">Add Variable</a>
+						</div>
+					</div>
+				);
+			}
+		});
+
+		var Interface = React.createClass({
+			getInitialState() {
+				return {
+					rows: [],
+					groups: {{ groups }}
+				};
+			},
+
+			createGroup(name) {
+				$.ajax({
+					url: '/admin/add_group',
+					dataType: 'json',
+					cache: false,
+					method: 'POST',
+					data: {name: name, _xsrf: xsrf},
+					success: function(result) {
+						this.loadRows(name);
+						this.setState({
+							groups: result.data
+						});
+					}.bind(this)
+				});
+			},
+
+			loadRows(group) {
+				$.ajax({
+					url: '/admin/rows?group=',
+					dataType: 'json',
+					cache: false,
+					data: {group: group},
+					success: function(result) {
+						this.setState({
+							rows: result.data
+						});
+					}.bind(this)
+				});
+			},
+
+			render() {
+				return (
+					<div>
+						<RowState
+							loadRows={this.loadRows}
+							createGroup={this.createGroup}
+							data={this.state.groups}
+						/>
+						<RowView data={this.state.rows}/>
+						<RowEditor/>
+					</div>
+				);
+			}
+		});
+
+		ReactDOM.render(
+			<Interface/>,
+			document.getElementById('interface')
+		);
+	</script>
+</html>

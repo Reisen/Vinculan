@@ -4,6 +4,71 @@ from collections import defaultdict
 from json import dumps
 
 class Index(Base):
+    def get_rows(self):
+        group = self.get_argument('group')
+        self.write(dumps({
+            'data': [
+                {'name': key['name']} for key in self.db.execute('''
+                    SELECT path FROM page WHERE grouping = ?
+                ''', (group,)).fetchall()
+            ]
+        }))
+
+    def add_group(self):
+        name = self.get_argument('name')
+        print('Adding Group', name)
+        self.db.execute('INSERT INTO grouping VALUES (?)', (name,))
+        self.db.commit()
+        self.write(dumps({
+            'data': [
+                {'name': key['name']} for key in self.db.execute('''
+                    SELECT name FROM grouping
+                ''').fetchall()
+            ]
+        }))
+
+    def get(self, method):
+        try:
+            data = {
+                'rows': lambda: self.get_rows(),
+                'add_group': lambda: self.add_group()
+            }[method]()
+
+        except Exception as e:
+            self.template('_admin2.html', {
+                'groups': [{'name': key['name']} for key in self.db.execute('SELECT name FROM grouping').fetchall()]
+            })
+
+    def post(self, method):
+        self.get(method)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class OIndex(Base):
     def get(self):
         if not self.get_secure_cookie('auth'):
             self.redirect('/login')

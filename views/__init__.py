@@ -41,7 +41,7 @@ template.filters['sendmail'] = print_template
 
 class Base(RequestHandler):
     def prepare(self):
-        self.db = sqlite3.connect('data.db')
+        self.db = sqlite3.connect('data2.db')
         self.db.row_factory = sqlite3.Row
 
     def on_finish(self):
