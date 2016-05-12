@@ -38,6 +38,7 @@
 				var $dom = $(ReactDOM.findDOMNode(this));
 				var self = this;
 
+				/* Select Initialization */
 				$dom.find('select').material_select();
 				$dom.find('select').on('change', function() {
 					if(this.value !== '') {
@@ -45,8 +46,20 @@
 						return;
 					}
 
-					self.props.createGroup(window.prompt('Name of new Group'));
+					var group = window.prompt('Name of new Group');
+					if(group !== '' && group !== null) {
+						self.props.createGroup(window.prompt('Name of new Group'));
+					}
 				})
+
+				/* Domain Appending */
+				$dom.find('#domain').on('click', function() {
+					var group = $dom.find('select option:selected').val();
+					var domain = window.prompt('Name of new Domain');
+					if(group !== '' && domain !== '' && group !== null && domain !== null) {
+						self.props.createRow(group, domain);
+					}
+				});
 			},
 
 			render() {
@@ -78,7 +91,7 @@
 							</div>
 
 							<div className="row">
-								<a href="#" className="col s2 btn-flat">Add Domain</a>
+								<a id="domain" className="col s2 btn-flat">Add Domain</a>
 							</div>
 						</form>
 					</div>
@@ -99,7 +112,7 @@
 			render() {
 				return (
 					<a href="#editor" className="collection-item">
-						{this.props.name}
+						{this.props.path}
 						<span className="secondary-content" onClick={this.deleteRow}>
 							<i className="material-icons">content_copy</i>
 							<i className="material-icons">delete</i>
@@ -117,7 +130,7 @@
 			render() {
 				var Rows = this.props.data.map((row) => {
 					return (
-						<Row name={row.name} key={row.name}/>
+						<Row path={row.path} key={row.path}/>
 					);
 				})
 
@@ -197,9 +210,22 @@
 				});
 			},
 
+			createRow(group, path) {
+				$.ajax({
+					url: '/admin/add_row',
+					dataType: 'json',
+					cache: false,
+					method: 'POST',
+					data: {path: path, group: group, _xsrf: xsrf},
+					success: function(result) {
+						this.loadRows(group);
+					}.bind(this)
+				});
+			},
+
 			loadRows(group) {
 				$.ajax({
-					url: '/admin/rows?group=',
+					url: '/admin/rows',
 					dataType: 'json',
 					cache: false,
 					data: {group: group},
@@ -217,6 +243,7 @@
 						<RowState
 							loadRows={this.loadRows}
 							createGroup={this.createGroup}
+							createRow={this.createRow}
 							data={this.state.groups}
 						/>
 						<RowView data={this.state.rows}/>
