@@ -42,7 +42,6 @@ class Index(Base):
             }[method]()
 
         except Exception as e:
-            print(e)
             self.template('_admin2.html', {
                 'groups': [{'name': key['name']} for key in self.db.execute('SELECT name FROM grouping').fetchall()]
             })

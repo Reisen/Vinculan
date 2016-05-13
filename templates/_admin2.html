@@ -111,7 +111,7 @@
 
 			render() {
 				return (
-					<a href="#editor" className="collection-item">
+					<a data-path={this.props.path} onClick={this.props.focusPage} href="#editor" className="collection-item">
 						{this.props.path}
 						<span className="secondary-content" onClick={this.deleteRow}>
 							<i className="material-icons">content_copy</i>
@@ -120,7 +120,7 @@
 					</a>
 				);
 			}
-		})
+		});
 
 		var RowView = React.createClass({
 			deleteRow() {
@@ -130,7 +130,7 @@
 			render() {
 				var Rows = this.props.data.map((row) => {
 					return (
-						<Row path={row.path} key={row.path}/>
+						<Row focusPage={this.props.focusPage} path={row.path} key={row.path}/>
 					);
 				})
 
@@ -140,37 +140,41 @@
 					</div>
 				);
 			}
-		})
+		});
+
+		var Variable = React.createClass({
+			render() {
+				return (
+					<div className="input-field">
+						<input type="text"/>
+						<label>{this.props.name}</label>
+					</div>
+				);
+			}
+		});
 
 		var RowEditor = React.createClass({
 			render() {
+				var Variables = this.props.currVariables.map((variable) => {
+					return (
+						<Variable key={variable.name} name={variable.name}/>
+					);
+				});
+
 				return (
 					<div className="modal modal-fixed-footer" id="editor">
+						<h2>Title: {this.props.currDomain}</h2>
+
 						<div className="modal-content">
 							<div className="row">
 								<ul className="col s2">
 									<li>Pages</li>
-									<li> / </li>
-									<li> /london </li>
-									<li> /saved </li>
+									{this.props.currPages}
 								</ul>
 
 								<div className="col s10">
 									<form>
-										<div className="input-field">
-											<input type="text"/>
-											<label>Name</label>
-										</div>
-
-										<div className="input-field">
-											<input type="text"/>
-											<label>Location</label>
-										</div>
-
-										<div className="input-field">
-											<input type="text"/>
-											<label>PhoneNumber</label>
-										</div>
+										{Variables}
 									</form>
 								</div>
 							</div>
@@ -187,13 +191,6 @@
 		});
 
 		var Interface = React.createClass({
-			getInitialState() {
-				return {
-					rows: [],
-					groups: {{ groups }}
-				};
-			},
-
 			createGroup(name) {
 				$.ajax({
 					url: '/admin/add_group',
@@ -237,17 +234,47 @@
 				});
 			},
 
+			getInitialState() {
+				return {
+					rows: [],
+					groups: {{ groups }},
+					currDomain: 'none.co.uk',
+					currPages: ['/'],
+					currVariables: []
+				};
+			},
+
+			focusPage(domain) {
+				var $dom = $(domain.currentTarget);
+
+				this.setState({
+					currDomain: $dom.data('path'),
+					currPages: ['/', '/about'],
+					currVariables: [
+						{name: 'Foo', value: '---'},
+						{name: 'Bar', value: '---'},
+						{name: 'Baz', value: '---'}
+					]
+				});
+			},
+
 			render() {
 				return (
 					<div>
+						<RowEditor
+							currDomain={this.state.currDomain}
+							currPages={this.state.currPages}
+							currVariables={this.state.currVariables}/>
+
 						<RowState
 							loadRows={this.loadRows}
 							createGroup={this.createGroup}
 							createRow={this.createRow}
-							data={this.state.groups}
-						/>
-						<RowView data={this.state.rows}/>
-						<RowEditor/>
+							data={this.state.groups}/>
+
+						<RowView 
+							focusPage={this.focusPage}
+							data={this.state.rows}/>
 					</div>
 				);
 			}
