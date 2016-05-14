@@ -76,8 +76,8 @@
 						<form className="col s12">
 							<div className="row">
 								<div className="input-field col s2">
-									<select>
-										<option value="" selected disabled>Choose Group</option>
+									<select defaultValue="">
+										<option value="" disabled>Choose Group</option>
 										<option value="">New Group</option>
 										{Options}
 									</select>
@@ -161,6 +161,13 @@
 					);
 				});
 
+				var Pages = this.props.currPages.map((page) => {
+					alert(page);
+					return (
+						<option key={page} value={page}>{page}</option>
+					);
+				});
+
 				return (
 					<div className="modal modal-fixed-footer" id="editor">
 						<h2>Title: {this.props.currDomain}</h2>
@@ -169,7 +176,10 @@
 							<div className="row">
 								<ul className="col s2">
 									<li>Pages</li>
-									{this.props.currPages}
+									<select>
+										<option>Foo</option>
+										{Pages}
+									</select>
 								</ul>
 
 								<div className="col s10">
@@ -191,6 +201,12 @@
 		});
 
 		var Interface = React.createClass({
+			componentDidMount() {
+				var $dom = $(ReactDOM.findDOMNode(this));
+				var group = $dom.find('select option:eq(2)').val();
+				this.loadRows(group);;
+			},
+
 			createGroup(name) {
 				$.ajax({
 					url: '/admin/add_group',
@@ -239,7 +255,7 @@
 					rows: [],
 					groups: {{ groups }},
 					currDomain: 'none.co.uk',
-					currPages: ['/'],
+					currPages: [],
 					currVariables: []
 				};
 			},
