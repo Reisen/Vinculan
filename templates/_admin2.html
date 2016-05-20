@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
-	    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 		<style>
 			body { margin-top: 40px; }
 		</style>
@@ -13,19 +13,19 @@
 		</div>
 	</body>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react-dom.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react-dom.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
 	<script type="text/babel">
 		function getCookie(name) {
-            var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-            return r ? r[1] : undefined;
-        }
+			var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+			return r ? r[1] : undefined;
+		}
 
-        var xsrf = getCookie('_xsrf');
+		var xsrf = getCookie('_xsrf');
 
 
 
@@ -162,7 +162,6 @@
 				});
 
 				var Pages = this.props.currPages.map((page) => {
-					alert(page);
 					return (
 						<option key={page} value={page}>{page}</option>
 					);
@@ -176,7 +175,7 @@
 							<div className="row">
 								<ul className="col s2">
 									<li>Pages</li>
-									<select>
+									<select className="browser-default">
 										<option>Foo</option>
 										{Pages}
 									</select>
@@ -288,7 +287,7 @@
 							createRow={this.createRow}
 							data={this.state.groups}/>
 
-						<RowView 
+						<RowView
 							focusPage={this.focusPage}
 							data={this.state.rows}/>
 					</div>
