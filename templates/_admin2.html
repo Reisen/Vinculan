@@ -5,6 +5,82 @@
 		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 		<style>
 			body { margin-top: 40px; }
+            #editor {
+                overflow: hidden;
+                border: 1px solid #222;
+            }
+            #editor h2 {
+                text-align: center;
+                font-size: 15px;
+                line-height: 40px;
+                font-weight: 300;
+                border-bottom: 1px solid #222;
+                background-color: #37373F;
+                color: #CCC;
+            }
+            #editor h2 b {
+                color: white;
+                text-transform: uppercase;
+            }
+            #editor a {
+                margin: 0px;
+            }
+            #editor input, #editor textarea {
+                border: 0px;
+                margin: 0px;
+                height: auto;
+                padding: 8px;
+                font-size: 13px;
+            }
+            #editor input:focus {
+                border-bottom: 0px;
+                box-shadow: none;
+            }
+            #editor textarea {
+                min-height: 100px;
+                font-family: monospace;
+                font-size: 12px;
+                white-space: nowrap;
+                overflow: auto;
+            }
+            #editor .input-field {
+                margin-bottom: 3px;
+                margin-top: 0px;
+                background-color: white;
+                border: 1px solid #EEE;
+                padding-left: 120px;
+                padding-right: 20px;
+            }
+            #editor label {
+                top: 6px;
+                left: 0px;
+                text-align: left;
+                min-width: 120px;
+                border-right: 1px solid #CCC;
+                padding-left: 15px;
+                padding-right: 15px;
+                font-size: 13px;
+            }
+            #editor label.active {
+                -webkit-transform: none;
+                transform: none;
+                font-size: 13px;
+            }
+            #editor .modal-content {
+                padding-bottom: 100px;
+                background-color red;
+            }
+            .modal {
+                width: 90%;
+            }
+            .collection .collection-item {
+                padding-top: 5px;
+                padding-bottom: 5px;
+            }
+            .btn-flat {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
 		</style>
 	</head>
 
@@ -20,18 +96,12 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react-dom.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
 	<script type="text/babel">
-		function getCookie(name) {
-			var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+		var xsrf = (function() {
+			var r = document.cookie.match("\\b" + '_xsrf' + "=([^;]*)\\b");
 			return r ? r[1] : undefined;
-		}
-
-		var xsrf = getCookie('_xsrf');
+        })();
 
 
-
-
-
-		var Groups = {{ groups }};
 
 		var RowState = React.createClass({
 			componentDidMount() {
@@ -39,9 +109,10 @@
 				var self = this;
 
 				/* Select Initialization */
+                $dom.find('select option[value="{{ group }}"]').prop('selected', true);
 				$dom.find('select').material_select();
 				$dom.find('select').on('change', function() {
-					if(this.value !== '') {
+					if(this.value !== '_New') {
 						self.props.loadRows(this.value);
 						return;
 					}
@@ -50,7 +121,7 @@
 					if(group !== '' && group !== null) {
 						self.props.createGroup(group);
 					}
-				})
+				});
 
 				/* Domain Appending */
 				$dom.find('#domain').on('click', function() {
@@ -60,6 +131,16 @@
 						self.props.createRow(group, domain);
 					}
 				});
+
+                /* Variable Creation. */
+                $dom.find('#variable').on('click', function() {
+                    var group = $dom.find('select option:selected').val();
+                    var variable = window.prompt('Variable Name');
+                    var value  = window.prompt('Default Value');
+                    if(group !== '' && variable !== '' && group !== null && variable !== null) {
+                        self.props.createVariable(group, null, variable, value);
+                    }
+                });
 			},
 
 			render() {
@@ -78,7 +159,7 @@
 								<div className="input-field col s2">
 									<select defaultValue="">
 										<option value="" disabled>Choose Group</option>
-										<option value="">New Group</option>
+										<option value="_New">New Group</option>
 										{Options}
 									</select>
 									<label>Group</label>
@@ -91,7 +172,9 @@
 							</div>
 
 							<div className="row">
-								<a id="domain" className="col s2 btn-flat">Add Domain</a>
+								<a id="domain" className="btn-flat">Add Domain</a>
+								<a id="variable" className="btn-flat">Add Variable</a>
+								<a id="remove-group" className="btn-flat">Remove Group</a>
 							</div>
 						</form>
 					</div>
@@ -143,10 +226,27 @@
 		});
 
 		var Variable = React.createClass({
+            getInitialState() {
+                return {value: this.props.val};
+            },
+
+            handleChange(event) {
+                this.setState({value: event.target.value});
+            },
+
 			render() {
+                if(this.state.value.startsWith('<')) {
+                    return (
+                        <div className="input-field">
+                            <textarea onChange={this.handleChange} value={this.state.value}></textarea>
+                            <label>{this.props.name}</label>
+                        </div>
+                    );
+                }
+
 				return (
 					<div className="input-field">
-						<input type="text"/>
+						<input onChange={this.handleChange} value={this.state.value} type="text"/>
 						<label>{this.props.name}</label>
 					</div>
 				);
@@ -157,7 +257,7 @@
 			render() {
 				var Variables = this.props.currVariables.map((variable) => {
 					return (
-						<Variable key={variable.name} name={variable.name}/>
+						<Variable key={variable.name} val={variable.value} name={variable.name}/>
 					);
 				});
 
@@ -169,17 +269,14 @@
 
 				return (
 					<div className="modal modal-fixed-footer" id="editor">
-						<h2>Title: {this.props.currDomain}</h2>
+						<h2><b>EDITING:</b> {this.props.currDomain}</h2>
 
 						<div className="modal-content">
 							<div className="row">
-								<ul className="col s2">
-									<li>Pages</li>
-									<select className="browser-default">
-										<option>Foo</option>
-										{Pages}
-									</select>
-								</ul>
+                                <select defaultValue="" className="browser-default col s2">
+                                    <option value="">Select Subpage</option>
+                                    {Pages}
+                                </select>
 
 								<div className="col s10">
 									<form>
@@ -190,9 +287,10 @@
 						</div>
 
 						<div className="modal-footer">
-							<a href="#" className="modal-action modal-close btn">Save</a>
-							<a href="#" className="modal-action btn-flat">Clone Site</a>
-							<a href="#" className="modal-action btn-flat">Add Variable</a>
+							<a href="#" className="action-save modal-action modal-close btn-flat">Save</a>
+							<a href="#" className="action-clone modal-action btn-flat">Clone Site</a>
+							<a href="#" className="action-variable modal-action btn-flat">Add Variable</a>
+                            <a href="#" className="action-page modal-action btn-flat">Add Page</a>
 						</div>
 					</div>
 				);
@@ -202,8 +300,8 @@
 		var Interface = React.createClass({
 			componentDidMount() {
 				var $dom = $(ReactDOM.findDOMNode(this));
-				var group = $dom.find('select option:eq(2)').val();
-				this.loadRows(group);;
+				var group = '{{ group }}' === '' ? $dom.find('select option:eq(3)').val() : "{{ group }}";
+				this.loadRows(group);
 			},
 
 			createGroup(name) {
@@ -235,6 +333,19 @@
 				});
 			},
 
+            createVariable(group, path, variable, value) {
+                $.ajax({
+					url: '/admin/add_variable',
+					dataType: 'json',
+					cache: false,
+					method: 'POST',
+					data: {value: value, variable: variable, path: path, group: group, _xsrf: xsrf},
+					success: function(result) {
+						this.loadRows(group);
+					}.bind(this)
+                });
+            },
+
 			loadRows(group) {
 				$.ajax({
 					url: '/admin/rows',
@@ -261,35 +372,43 @@
 
 			focusPage(domain) {
 				var $dom = $(domain.currentTarget);
+                var path = $dom.data('path');
+				$dom = $(ReactDOM.findDOMNode(this));
+                var group = $dom.find('select option:selected').val();
 
-				this.setState({
-					currDomain: $dom.data('path'),
-					currPages: ['/', '/about'],
-					currVariables: [
-						{name: 'Foo', value: '---'},
-						{name: 'Bar', value: '---'},
-						{name: 'Baz', value: '---'}
-					]
+				$.ajax({
+					url: '/admin/variables',
+					dataType: 'json',
+					cache: false,
+					data: {group: group, path: path},
+					success: function(result) {
+						this.setState({
+							currDomain: path,
+                            currPages: result.pages,
+                            currVariables: result.variables
+						});
+					}.bind(this)
 				});
 			},
 
 			render() {
 				return (
 					<div>
-						<RowEditor
-							currDomain={this.state.currDomain}
-							currPages={this.state.currPages}
-							currVariables={this.state.currVariables}/>
-
 						<RowState
 							loadRows={this.loadRows}
 							createGroup={this.createGroup}
 							createRow={this.createRow}
+                            createVariable={this.createVariable}
 							data={this.state.groups}/>
 
 						<RowView
 							focusPage={this.focusPage}
 							data={this.state.rows}/>
+
+						<RowEditor
+							currDomain={this.state.currDomain}
+							currPages={this.state.currPages}
+							currVariables={this.state.currVariables}/>
 					</div>
 				);
 			}

@@ -4,16 +4,18 @@ CREATE TABLE IF NOT EXISTS grouping (
 );
 
 CREATE TABLE IF NOT EXISTS page (
-	grouping TEXT,
 	path TEXT,
-	PRIMARY KEY(grouping, path)
+    parent TEXT,
+	grouping TEXT,
+	PRIMARY KEY(path),
+    FOREIGN KEY(parent) REFERENCES page(path),
+    FOREIGN KEY(grouping) REFERENCES grouping(name)
 );
 
 CREATE TABLE IF NOT EXISTS variable (
-	grouping TEXT,
 	path TEXT,
 	name TEXT,
 	value TEXT,
-	PRIMARY KEY(grouping, path, name),
-	FOREIGN KEY(grouping, path) REFERENCES page(grouping, path)
+	PRIMARY KEY(path, name),
+	FOREIGN KEY(path) REFERENCES page(path)
 );

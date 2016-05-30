@@ -14,6 +14,42 @@ class Index(Base):
             ]
         }))
 
+    def get_variables(self, group = None, path = None):
+        group = group or self.get_argument('group')
+        path = path or self.get_argument('path')
+        paths = list(filter(bool, path.split('/')))
+
+        # Resolve time...
+        variables = {}
+
+        # Globals
+        group_variables = self.db.execute('''
+            SELECT * FROM variable
+            WHERE path = ? AND path NOT IN (SELECT path FROM page)
+        ''', (group,)).fetchall()
+
+        for var in group_variables:
+            variables[var['name']] = var['value']
+
+        # Page Variables
+        page_variables = self.db.execute('''
+            SELECT * FROM variable
+            WHERE path = ?
+        ''', (path,)).fetchall()
+
+        for var in page_variables:
+            variables[var['name']] = var['value']
+
+        # Get subpages.
+        pages = self.db.execute('''
+            SELECT * FROM page WHERE path LIKE ?
+        ''', (path + '%',)).fetchall()
+
+        self.write(dumps({
+            'variables': sorted([{'name': k, 'value': v} for (k, v) in variables.items()], key = lambda v: v['name']),
+            'pages': [page['path'][len(path):] + '/' for page in pages]
+        }))
+
     def add_group(self):
         name = self.get_argument('name')
         self.db.execute('INSERT INTO grouping VALUES (?)', (name,))
@@ -29,21 +65,35 @@ class Index(Base):
     def add_row(self):
         path = self.get_argument('path')
         group = self.get_argument('group')
-        self.db.execute('INSERT INTO page VALUES (?, ?)', (group, path))
+        self.db.execute('INSERT INTO page VALUES (?, ?, ?)', (path, None, group))
         self.db.commit()
         self.get_rows(group)
+
+    def add_variable(self):
+        variable = self.get_argument('variable')
+        group = self.get_argument('group')
+        path = self.get_argument('path', None)
+        value = self.get_argument('value', None)
+        path = path if path else group
+        self.db.execute('INSERT INTO variable VALUES (?, ?, ?)', (path, variable, value))
+        self.db.commit()
+        self.write(dumps({}))
 
     def get(self, method):
         try:
             data = {
                 'rows': lambda: self.get_rows(),
+                'variables': lambda: self.get_variables(),
                 'add_group': lambda: self.add_group(),
+                'add_variable': lambda: self.add_variable(),
                 'add_row': lambda: self.add_row()
             }[method]()
 
         except Exception as e:
+            print('Error: ', e)
             self.template('_admin2.html', {
-                'groups': [{'name': key['name']} for key in self.db.execute('SELECT name FROM grouping').fetchall()]
+                'groups': [{'name': key['name']} for key in self.db.execute('SELECT name FROM grouping').fetchall()],
+                'group': self.get_argument('group', '')
             })
 
     def post(self, method):
@@ -196,7 +246,7 @@ class SubDIndex:
             ''', (domain,)).fetchall()
 
             bindings = defaultdict(dict)
-        
+
             for (page, variable, value) in data:
                 bindings[page][variable] = value
                 variables.add(variable)
