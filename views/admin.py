@@ -9,7 +9,7 @@ class Index(Base):
         self.write(dumps({
             'data': [
                 {'path': key['path']} for key in self.db.execute('''
-                    SELECT path FROM page WHERE grouping = ?
+                    SELECT path FROM page WHERE grouping = ? AND path NOT LIKE '%/%'
                 ''', (group,)).fetchall()
             ]
         }))
@@ -43,11 +43,11 @@ class Index(Base):
         # Get subpages.
         pages = self.db.execute('''
             SELECT * FROM page WHERE path LIKE ?
-        ''', (path + '%',)).fetchall()
+        ''', (paths[0] + '%',)).fetchall()
 
         self.write(dumps({
             'variables': sorted([{'name': k, 'value': v} for (k, v) in variables.items()], key = lambda v: v['name']),
-            'pages': [page['path'][len(path):] + '/' for page in pages]
+            'pages': sorted([page['path'][len(paths[0]):] + '/' for page in pages])[1:]
         }))
 
     def add_group(self):
@@ -64,6 +64,7 @@ class Index(Base):
 
     def add_row(self):
         path = self.get_argument('path')
+        path = '/'.join(filter(bool, path.split('/')))
         group = self.get_argument('group')
         self.db.execute('INSERT INTO page VALUES (?, ?, ?)', (path, None, group))
         self.db.commit()

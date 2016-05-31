@@ -141,6 +141,11 @@
                         self.props.createVariable(group, null, variable, value);
                     }
                 });
+
+                $dom.find('#remove-group').on('click', function() {
+                    if(window.confirm('Are you sure?')) {
+                    }
+                });
 			},
 
 			render() {
@@ -254,6 +259,24 @@
 		});
 
 		var RowEditor = React.createClass({
+            componentDidMount() {
+                var $dom = $(ReactDOM.findDOMNode(this));
+                var self = this;
+
+                $dom.find('.action-page').on('click', function() {
+                    var page = window.prompt('Page URL');
+                    if(page !== '' && page !== null) {
+                        self.props.createRow(undefined, self.props.currDomain + '/' + page);
+                        self.props.focusPage('');
+                        $dom.find('select option:eq(0)').prop('selected', true);
+                    }
+                });
+            },
+
+            handleChange(event) {
+                this.props.focusPage(event.target.value);
+            },
+
 			render() {
 				var Variables = this.props.currVariables.map((variable) => {
 					return (
@@ -273,7 +296,7 @@
 
 						<div className="modal-content">
 							<div className="row">
-                                <select defaultValue="" className="browser-default col s2">
+                                <select onChange={this.handleChange} defaultValue="" className="browser-default col s2">
                                     <option value="">Select Subpage</option>
                                     {Pages}
                                 </select>
@@ -300,7 +323,11 @@
 		var Interface = React.createClass({
 			componentDidMount() {
 				var $dom = $(ReactDOM.findDOMNode(this));
-				var group = '{{ group }}' === '' ? $dom.find('select option:eq(3)').val() : "{{ group }}";
+                var group = '{{ group }}';
+                if(group === '') {
+                    group = $dom.find('select option:eq(3)').val();
+                    $dom.find('select option:eq(3)').prop('selected', true);
+                }
 				this.loadRows(group);
 			},
 
@@ -321,6 +348,9 @@
 			},
 
 			createRow(group, path) {
+				var $dom = $(ReactDOM.findDOMNode(this));
+                group = (typeof group !== 'undefined') ? group : $dom.find('select option:selected').val();
+
 				$.ajax({
 					url: '/admin/add_row',
 					dataType: 'json',
@@ -391,6 +421,25 @@
 				});
 			},
 
+            focusSubpage(page) {
+                var path = this.state.currDomain;
+				var $dom = $(ReactDOM.findDOMNode(this));
+                var group = $dom.find('select option:selected').val();
+
+				$.ajax({
+					url: '/admin/variables',
+					dataType: 'json',
+					cache: false,
+					data: {group: group, path: path + page},
+					success: function(result) {
+						this.setState({
+                            currPages: result.pages,
+                            currVariables: result.variables
+						});
+					}.bind(this)
+				});
+            },
+
 			render() {
 				return (
 					<div>
@@ -406,6 +455,8 @@
 							data={this.state.rows}/>
 
 						<RowEditor
+                            focusPage={this.focusSubpage}
+                            createRow={this.createRow}
 							currDomain={this.state.currDomain}
 							currPages={this.state.currPages}
 							currVariables={this.state.currVariables}/>
