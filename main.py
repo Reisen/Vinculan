@@ -1,6 +1,6 @@
 from tornado.ioloop import IOLoop
 from tornado.web import Application, url
-import os
+import os, logging, logging.handlers
 
 try:
     from settings import settings
@@ -81,5 +81,23 @@ if __name__ == '__main__':
 
     app.handlers = mod_handlers
 
-    app.listen(8001)
-    IOLoop.current().start()
+    # Setup Log Handlers
+    smtp_handler = logging.handlers.SMTPHandler(
+        (settings['smtp_host'], settings['smtp_port']),
+        settings['error_from'],
+        settings['error_to'],
+        '[Vinculan] Error Ocurred',
+        credentials = (settings['smtp_user'], settings['smtp_pass']),
+        secure = tuple()
+    )
+
+    logger = logging.getLogger('tornado.application')
+    logger.addHandler(smtp_handler)
+
+    while True:
+        try:
+            app.listen(8001)
+            IOLoop.current().start()
+
+        except Exception as e:
+            pass
