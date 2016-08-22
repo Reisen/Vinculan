@@ -3,11 +3,11 @@
 {% endmacro %}
 
 {% if this.confirm_captcha() %}
-    {{
+    {#
         email()|sendmail(
             this.get_argument('address'),
             'foo@bar.com',
             'Subject'
         )
-    }}
+    #}
 {% endif %}
