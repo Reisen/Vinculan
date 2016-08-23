@@ -38,6 +38,12 @@ class Serve(Base):
             WHERE domain.host LIKE ?
         ''', ('%{}%'.format(self.request.host.split(':', 1)[0]),)).fetchone()
 
+        if not host:
+            self.clear()
+            self.set_status(404)
+            self.template('404.html', {})
+            return
+
         orig = orig if orig else 'index'
         path = orig if '.' in orig else orig + '.html'
         path = os.path.join(host['template'], path)
