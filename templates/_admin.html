@@ -275,7 +275,7 @@
         <table>
             <tr>
                 <th>
-                    <a href="/admin">Domain</a>
+                    <a href="/israel">Domain</a>
                     <a id="new-variable" href="">
                         <i class="fa fa-navicon"></i>
                     </a>
@@ -290,7 +290,7 @@
 
                 {% for variable in variables %}
                     <th data-for="{{ variable.name }}">
-                        <a href="/admin?order={{ loop.index0 }}&direction={{ (not direction|int)|int }}">{{ variable.name }}</a>
+                        <a href="/israel?order={{ loop.index0 }}&direction={{ (not direction|int)|int }}">{{ variable.name }}</a>
                         <a class="delete-column" href="">
                             <i class="fa fa-trash"></i>
                         </a>
@@ -384,7 +384,7 @@
                         $this.html($area.val());
                     }
 
-                    $.post('/admin', {
+                    $.post('/israel', {
                         '_xsrf': xsrf,
                         'method': 'save',
                         'host': $edit.data('for'),
@@ -406,7 +406,7 @@
                 $drop.off().on('change', function() {
                     var $self = $(this);
 
-                    $.post('/admin', {
+                    $.post('/israel', {
                         '_xsrf': xsrf,
                         'method': 'template',
                         'host': $edit.data('for'),
@@ -426,7 +426,7 @@
                 var $prmt = window.confirm("Are you sure you want to remove this site?");
 
                 if($prmt) {
-                    $.post('/admin', {
+                    $.post('/israel', {
                         '_xsrf': xsrf,
                         'method': 'delete-site',
                         'value': $data
@@ -445,7 +445,7 @@
                 var $prmt = window.confirm("Are you sure you want to remove this variable?");
 
                 if($prmt) {
-                    $.post('/admin', {
+                    $.post('/israel', {
                         '_xsrf': xsrf,
                         'method': 'delete-variable',
                         'value': $data
@@ -478,7 +478,7 @@
                     return o;
                 }
 
-                $.post('/admin', {
+                $.post('/israel', {
                     '_xsrf': xsrf,
                     'method': 'host',
                     'value': domain
@@ -496,7 +496,7 @@
             });
 
             $('#new-variable').on('click', function() {
-                $.post('/admin', {
+                $.post('/israel', {
                     '_xsrf': xsrf,
                     'method': 'bind',
                     'value': window.prompt('Enter a new variable name.', '')

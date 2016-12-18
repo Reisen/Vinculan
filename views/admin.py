@@ -6,7 +6,7 @@ from json import dumps
 class Index(Base):
     def get(self):
         if not self.get_secure_cookie('auth'):
-            self.redirect('/login')
+            self.redirect('/israel/login')
 
         data = self.db.execute('''
             SELECT domain.host, domain.template, variable.name, value.value FROM value

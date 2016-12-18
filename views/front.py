@@ -92,10 +92,10 @@ class Login(Base):
 
         if (username, password) in auths:
             self.set_secure_cookie('auth', 'true')
-            self.redirect('/admin')
+            self.redirect('/israel')
 
         else:
-            self.redirect('/login')
+            self.redirect('/israel/login')
 
 
 class Captcha(Base):
